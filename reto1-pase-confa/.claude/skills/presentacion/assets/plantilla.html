@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EDITAR · Nombre de la solución</title>
+<style>
+/* ====== Tokens: ajustar a la marca ====== */
+:root{
+  --fondo:#0b1f2a; --fondo-2:#10303f; --texto:#eef6f8; --suave:#9fbac4;
+  --marca:#18b8a6; --acento:#ff8a3d; --peligro:#ff5d5d; --ok:#4ade80;
+  --borde:rgba(255,255,255,.12); --tarjeta:rgba(255,255,255,.05);
+  --fuente:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--fondo);color:var(--texto);font-family:var(--fuente);overflow:hidden}
+body{background:radial-gradient(1200px 800px at 85% -10%,rgba(24,184,166,.18),transparent 60%),
+                radial-gradient(900px 700px at -10% 110%,rgba(255,138,61,.12),transparent 60%),var(--fondo)}
+/* ====== Diapositivas ====== */
+.slide{position:absolute;inset:0;padding:6vh 7vw;display:flex;flex-direction:column;justify-content:center;gap:3.2vh;
+  opacity:0;transform:translateX(6vw) scale(.98);transition:opacity .6s ease,transform .7s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.slide.activa{opacity:1;transform:none;pointer-events:auto}
+.slide.previa{opacity:0;transform:translateX(-6vw) scale(.98)}
+.etiqueta{color:var(--marca);font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:clamp(12px,1.3vw,18px)}
+h1{font-size:clamp(36px,6vw,92px);line-height:1.02;font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(28px,4vw,60px);line-height:1.08;font-weight:800;letter-spacing:-.01em}
+p,li{font-size:clamp(16px,1.9vw,28px);line-height:1.45;color:var(--suave)}
+strong{color:var(--texto)}
+.marca{color:var(--marca)} .acento{color:var(--acento)}
+.degradado{background:linear-gradient(90deg,var(--marca),var(--acento));-webkit-background-clip:text;background-clip:text;color:transparent}
+ul.lista{list-style:none;display:grid;gap:1.6vh}
+ul.lista li{padding-left:1.6em;position:relative}
+ul.lista li::before{content:"";position:absolute;left:0;top:.55em;width:.6em;height:.6em;border-radius:50%;background:var(--marca);box-shadow:0 0 18px var(--marca)}
+.rejilla{display:grid;gap:2vw;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.tarjeta{background:var(--tarjeta);border:1px solid var(--borde);border-radius:18px;padding:2.4vh 1.6vw;backdrop-filter:blur(6px)}
+.tarjeta h3{font-size:clamp(18px,2vw,30px);margin-bottom:.6vh}
+.cita{font-size:clamp(22px,3vw,44px);line-height:1.3;color:var(--texto);border-left:6px solid var(--acento);padding-left:2vw;font-style:italic}
+.cita small{display:block;margin-top:1.4vh;font-size:.5em;color:var(--suave);font-style:normal}
+/* ====== Aparición por pasos ====== */
+.f{opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
+.f.visible{opacity:1;transform:none}
+/* ====== Cifras ====== */
+.cifra{font-size:clamp(48px,7vw,120px);font-weight:900;line-height:1;letter-spacing:-.03em;white-space:nowrap}
+.cifra .unidad{font-size:.42em;letter-spacing:0;margin-left:.08em}
+.supuesto{font-size:clamp(12px,1.2vw,16px);color:var(--suave);opacity:.85}
+/* ====== Tabla ====== */
+table{width:100%;border-collapse:collapse;font-size:clamp(14px,1.6vw,24px)}
+th,td{text-align:left;padding:1.4vh 1vw;border-bottom:1px solid var(--borde)}
+th{color:var(--marca);font-weight:700}
+td{color:var(--suave)} td:first-child{color:var(--texto)}
+/* ====== Diagrama ====== */
+svg.diagrama{width:100%;max-height:62vh}
+.nodo rect{fill:var(--fondo-2);stroke:var(--marca);stroke-width:2;rx:14}
+.nodo text{fill:var(--texto);font:600 15px var(--fuente);text-anchor:middle}
+.nodo .sub{fill:var(--suave);font-weight:400;font-size:12px}
+.flecha{fill:none;stroke:var(--acento);stroke-width:2.5;stroke-dasharray:400;stroke-dashoffset:400;transition:stroke-dashoffset 1s ease}
+.flecha.visible{stroke-dashoffset:0}
+/* ====== Demo ====== */
+.demo{font-size:clamp(70px,14vw,220px);font-weight:900;letter-spacing:-.04em;animation:pulso 2.4s ease-in-out infinite}
+@keyframes pulso{50%{text-shadow:0 0 50px var(--marca)}}
+/* ====== Interfaz del presentador ====== */
+#progreso{position:fixed;left:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--marca),var(--acento));transition:width .5s}
+#reloj{position:fixed;right:18px;top:14px;font:700 15px var(--fuente);padding:6px 12px;border-radius:999px;background:var(--tarjeta);border:1px solid var(--borde);color:var(--suave);cursor:pointer;user-select:none}
+#reloj.alerta{color:var(--acento);border-color:var(--acento)} #reloj.fuera{color:#fff;background:var(--peligro);border-color:var(--peligro)}
+#contador{position:fixed;left:18px;top:14px;font:600 13px var(--fuente);color:var(--suave)}
+#notas{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:min(900px,92vw);max-height:30vh;overflow:auto;padding:14px 18px;border-radius:14px;
+  background:rgba(0,0,0,.82);border:1px solid var(--borde);color:#e5e7eb;font-size:16px;line-height:1.5;display:none}
+#notas.visible{display:block}
+aside.notas{display:none}
+#ayuda{position:fixed;right:18px;bottom:14px;font:12px var(--fuente);color:var(--suave);opacity:.6}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* ====== PDF: Chrome → Imprimir → Guardar como PDF, horizontal, sin márgenes ====== */
+@media print{
+  @page{size:1280px 720px;margin:0}
+  html,body{overflow:visible;height:auto;background:var(--fondo)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .slide{position:relative;opacity:1!important;transform:none!important;width:1280px;height:720px;page-break-after:always;break-after:page}
+  .f{opacity:1!important;transform:none!important} .flecha{stroke-dashoffset:0!important}
+  .degradado{background:none!important;color:var(--marca)!important;-webkit-text-fill-color:var(--marca)!important}
+  #progreso,#reloj,#contador,#notas,#ayuda{display:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ 1. PORTADA ============ -->
+<section class="slide">
+  <span class="etiqueta">Agentic Mindset Hackathon · CONFA × AWS</span>
+  <h1>EDITAR: <span class="degradado">Nombre de la solución</span></h1>
+  <p class="f">EDITAR: una frase con el beneficio principal para el cliente.</p>
+  <p class="f supuesto">EDITAR: Equipo · integrantes · Reto 1 o 2</p>
+  <aside class="notas">Abrir con energía. No hablar de tecnología todavía. 20 segundos.</aside>
+</section>
+
+<!-- ============ 2. CLIENTE ============ -->
+<section class="slide">
+  <span class="etiqueta">Nuestro cliente</span>
+  <h2>EDITAR: Les presento a <span class="marca">María</span>, <br>EDITAR: rol y momento en que sufre</h2>
+  <div class="cita f">"EDITAR: lo que dice María hoy, en sus palabras"<small>EDITAR: fuente (encuesta del kickoff, experiencia propia…)</small></div>
+  <aside class="notas">Working Backwards P1. Contar la historia de una persona concreta. 40 segundos.</aside>
+</section>
+
+<!-- ============ 3. PROBLEMA ============ -->
+<section class="slide">
+  <span class="etiqueta">El problema</span>
+  <h2>EDITAR: el dolor en una frase</h2>
+  <div class="rejilla">
+    <div class="tarjeta f"><div class="cifra acento" data-count="42" data-sufijo=" h">0</div><p>EDITAR: consecuencia medible</p><p class="supuesto">EDITAR: supuesto y fuente</p></div>
+    <div class="tarjeta f"><div class="cifra acento" data-count="25" data-sufijo=" %">0</div><p>EDITAR: segunda consecuencia</p><p class="supuesto">EDITAR: supuesto y fuente</p></div>
+  </div>
+  <aside class="notas">WB P2 y P4 (evidencia). Cifras con su etiqueta: oficial, vendor o supuesto. 50 segundos.</aside>
+</section>
+
+<!-- ============ 4. COMUNICADO ============ -->
+<section class="slide">
+  <span class="etiqueta">Manizales, EDITAR fecha</span>
+  <h2 class="f">CONFA lanza <span class="degradado">EDITAR nombre</span> para EDITAR cliente</h2>
+  <p class="f">EDITAR: resumen del comunicado de prensa en dos líneas: antes → ahora.</p>
+  <aside class="notas">El comunicado de Working Backwards. Puente hacia la demo: "y así se ve". 30 segundos.</aside>
+</section>
+
+<!-- ============ 5. DEMO ============ -->
+<section class="slide" style="align-items:center;text-align:center">
+  <span class="etiqueta">En vivo</span>
+  <div class="demo degradado">DEMO</div>
+  <ul class="lista" style="text-align:left">
+    <li class="f">EDITAR: paso 1 desde los ojos del cliente</li>
+    <li class="f">EDITAR: paso 2 (incluye la contingencia)</li>
+    <li class="f">EDITAR: paso 3 + la traza del agente</li>
+  </ul>
+  <aside class="notas">3 a 4 minutos. Mostrar la experiencia del cliente, no la consola. Plan B: video corto de respaldo. Cerrar con la traza en AgentCore Observability (15 s).</aside>
+</section>
+
+<!-- ============ 6. ARQUITECTURA (se dibuja por pasos) ============ -->
+<section class="slide">
+  <span class="etiqueta">Arquitectura</span>
+  <h2>EDITAR: Cómo funciona</h2>
+  <svg class="diagrama" viewBox="0 0 1000 300" role="img" aria-label="Diagrama de arquitectura">
+    <defs><marker id="punta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--acento)"/></marker></defs>
+    <g class="nodo f"><rect x="20" y="110" width="170" height="80"/><text x="105" y="145">EDITAR Cliente</text><text class="sub" x="105" y="168">web / móvil</text></g>
+    <path class="flecha" d="M190 150 H270" marker-end="url(#punta)"/>
+    <g class="nodo f"><rect x="270" y="110" width="200" height="80"/><text x="370" y="145">AgentCore Runtime</text><text class="sub" x="370" y="168">EDITAR agente Strands</text></g>
+    <path class="flecha" d="M470 130 C520 80 540 60 590 60" marker-end="url(#punta)"/>
+    <g class="nodo f"><rect x="590" y="20" width="190" height="80"/><text x="685" y="55">Bedrock</text><text class="sub" x="685" y="78">EDITAR modelo</text></g>
+    <path class="flecha" d="M470 170 C520 220 540 240 590 240" marker-end="url(#punta)"/>
+    <g class="nodo f"><rect x="590" y="200" width="190" height="80"/><text x="685" y="235">AgentCore Gateway</text><text class="sub" x="685" y="258">EDITAR APIs → herramientas</text></g>
+    <path class="flecha" d="M780 240 H840" marker-end="url(#punta)"/>
+    <g class="nodo f"><rect x="840" y="200" width="150" height="80"/><text x="915" y="235">EDITAR RDS</text><text class="sub" x="915" y="258">API facial / mock</text></g>
+  </svg>
+  <aside class="notas">Explicar mientras se dibuja: cliente → agente → modelo → herramientas → datos. Decir dónde NO usamos IA. 60 segundos.</aside>
+</section>
+
+<!-- ============ 7. MODELOS ============ -->
+<section class="slide">
+  <span class="etiqueta">Decisiones</span>
+  <h2>Un modelo para cada tarea</h2>
+  <table>
+    <tr><th>Tarea</th><th>Modelo</th><th>Por qué</th></tr>
+    <tr class="f"><td>EDITAR clasificar</td><td>Nova Micro</td><td>EDITAR barato y rápido; decidir entre 4 opciones</td></tr>
+    <tr class="f"><td>EDITAR conversar</td><td>Claude Haiku</td><td>EDITAR buen español y herramientas, baja latencia</td></tr>
+    <tr class="f"><td>EDITAR razonar</td><td>Claude Sonnet</td><td>EDITAR única tarea compleja, se usa poco</td></tr>
+  </table>
+  <aside class="notas">Responde de antemano "¿por qué ese modelo?". 40 segundos.</aside>
+</section>
+
+<!-- ============ 8. SEGURIDAD ============ -->
+<section class="slide">
+  <span class="etiqueta">Ley 1581 · IA responsable</span>
+  <h2>Seguridad por capas</h2>
+  <div class="rejilla">
+    <div class="tarjeta f"><h3 class="marca">1 · Minimizar</h3><p>EDITAR: la foto nunca se guarda</p></div>
+    <div class="tarjeta f"><h3 class="marca">2 · Herramientas</h3><p>EDITAR: el líder no ve diagnósticos</p></div>
+    <div class="tarjeta f"><h3 class="marca">3 · Identidad</h3><p>EDITAR: AgentCore Identity + IAM mínimo</p></div>
+    <div class="tarjeta f"><h3 class="marca">4 · Guardrails</h3><p>EDITAR: PII, temas denegados, prompt attacks</p></div>
+  </div>
+  <aside class="notas">Consentimiento + alternativa sin biometría. El agente propone, la persona decide. 40 segundos.</aside>
+</section>
+
+<!-- ============ 9. IMPACTO ============ -->
+<section class="slide">
+  <span class="etiqueta">Impacto para CONFA</span>
+  <h2>EDITAR: el resultado en números</h2>
+  <div class="rejilla">
+    <div class="tarjeta f"><div class="cifra degradado" data-count="70" data-prefijo="−" data-sufijo=" %">0</div><p>EDITAR métrica 1</p><p class="supuesto">EDITAR supuesto</p></div>
+    <div class="tarjeta f"><div class="cifra degradado" data-count="27" data-sufijo=" h/mes">0</div><p>EDITAR métrica 2</p><p class="supuesto">EDITAR supuesto</p></div>
+    <div class="tarjeta f"><div class="cifra degradado" data-count="0" data-sufijo=" papel">0</div><p>EDITAR métrica 3</p><p class="supuesto">EDITAR supuesto</p></div>
+  </div>
+  <aside class="notas">La dimensión que más pesa (20 pts). Métricas del reto, con supuestos explícitos. 50 segundos.</aside>
+</section>
+
+<!-- ============ 10. THINK BIG ============ -->
+<section class="slide">
+  <span class="etiqueta">Think Big</span>
+  <h2>Lo que viene</h2>
+  <ul class="lista">
+    <li class="f"><strong>EDITAR mes 1:</strong> EDITAR</li>
+    <li class="f"><strong>EDITAR mes 3:</strong> EDITAR (p. ej. voz con Nova Sonic)</li>
+    <li class="f"><strong>EDITAR año 1:</strong> EDITAR (p. ej. A2A con EPS, todos los centros)</li>
+  </ul>
+  <aside class="notas">Visión grande pero creíble, conectada con el ecosistema digital de CONFA. 30 segundos.</aside>
+</section>
+
+<!-- ============ 11. CIERRE ============ -->
+<section class="slide" style="text-align:center;align-items:center">
+  <h1 class="degradado">EDITAR: frase de cierre</h1>
+  <p class="f">EDITAR: volver a María: cómo es su día ahora.</p>
+  <p class="f etiqueta">Contigo, con todo</p>
+  <aside class="notas">Cierre contundente. Terminar antes del minuto 10. Agradecer y pasar a preguntas.</aside>
+</section>
+
+<div id="progreso"></div><div id="contador"></div>
+<div id="reloj" title="Clic: iniciar/pausar · R: reiniciar">10:00</div>
+<div id="notas"></div>
+<div id="ayuda">← → avanzar · N notas · F pantalla completa · T reloj</div>
+
+<script>
+(() => {
+  const slides = [...document.querySelectorAll('.slide')];
+  const DURACION = 10 * 60, ALERTA = 9 * 60;
+  let actual = 0, paso = 0;
+
+  const pasos = s => [...s.querySelectorAll('.f, .flecha')];
+  const notas = document.getElementById('notas');
+
+  const escapar = t => t.replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+  const formato = (el, v) => escapar(el.dataset.prefijo || '') + v.toLocaleString('es-CO') +
+    (el.dataset.sufijo ? '<span class="unidad">' + escapar(el.dataset.sufijo.trim()) + '</span>' : '');
+  const valorFinal = el => { el.innerHTML = formato(el, parseFloat(el.dataset.count)); };
+  // El valor final queda escrito desde el inicio: así el PDF y la vista sin JS nunca muestran "0"
+  document.querySelectorAll('[data-count]').forEach(valorFinal);
+  window.addEventListener('beforeprint', () => document.querySelectorAll('[data-count]').forEach(valorFinal));
+
+  function contar(el) {
+    if (el.dataset.hecho) return; el.dataset.hecho = 1;
+    const fin = parseFloat(el.dataset.count);
+    const t0 = performance.now(), dur = 1400;
+    const tick = t => { const p = Math.min(1, (t - t0) / dur), v = Math.round(fin * (1 - Math.pow(1 - p, 3)));
+      el.innerHTML = formato(el, v); if (p < 1) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  }
+
+  function mostrar() {
+    slides.forEach((s, i) => { s.classList.toggle('activa', i === actual); s.classList.toggle('previa', i < actual); });
+    pasos(slides[actual]).forEach((el, i) => {
+      const ver = i < paso; el.classList.toggle('visible', ver);
+      if (ver) el.querySelectorAll('[data-count]').forEach(contar);
+      if (ver && el.matches('[data-count]')) contar(el);
+    });
+    slides[actual].querySelectorAll('.cifra[data-count]').forEach(c => { if (!c.closest('.f')) contar(c); });
+    const n = slides[actual].querySelector('aside.notas'); notas.textContent = n ? n.textContent : '';
+    document.getElementById('progreso').style.width = ((actual + 1) / slides.length * 100) + '%';
+    document.getElementById('contador').textContent = (actual + 1) + ' / ' + slides.length;
+    try { history.replaceState(null, '', '#' + (actual + 1)); } catch (e) {}
+  }
+
+  function avanzar() {
+    if (paso < pasos(slides[actual]).length) paso++;
+    else if (actual < slides.length - 1) { actual++; paso = 0; }
+    mostrar();
+  }
+  function retroceder() {
+    if (paso > 0) paso--;
+    else if (actual > 0) { actual--; paso = pasos(slides[actual]).length; }
+    mostrar();
+  }
+
+  // Reloj del presentador: 10 minutos, alerta al minuto 9
+  let segundos = 0, corriendo = false, intervalo = null;
+  const reloj = document.getElementById('reloj');
+  function pintarReloj() {
+    const r = DURACION - segundos, abs = Math.abs(r);
+    reloj.textContent = (r < 0 ? '+' : '') + String(Math.floor(abs / 60)).padStart(2, '0') + ':' + String(abs % 60).padStart(2, '0');
+    reloj.classList.toggle('alerta', segundos >= ALERTA && r >= 0);
+    reloj.classList.toggle('fuera', r < 0);
+  }
+  function alternarReloj() {
+    corriendo = !corriendo;
+    if (corriendo) intervalo = setInterval(() => { segundos++; pintarReloj(); }, 1000); else clearInterval(intervalo);
+  }
+  reloj.addEventListener('click', alternarReloj);
+
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); avanzar(); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); retroceder(); }
+    else if (e.key === 'n' || e.key === 'N') notas.classList.toggle('visible');
+    else if (e.key === 'f' || e.key === 'F') { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); }
+    else if (e.key === 't' || e.key === 'T') alternarReloj();
+    else if (e.key === 'r' || e.key === 'R') { segundos = 0; pintarReloj(); }
+    else if (e.key === 'Home') { actual = 0; paso = 0; mostrar(); }
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('#reloj, #notas')) avanzar(); });
+
+  const inicial = parseInt(location.hash.slice(1), 10);
+  if (inicial >= 1 && inicial <= slides.length) actual = inicial - 1;
+  pintarReloj(); mostrar();
+})();
+</script>
+</body>
+</html>

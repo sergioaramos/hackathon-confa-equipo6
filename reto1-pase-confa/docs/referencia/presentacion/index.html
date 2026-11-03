@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pase CONFA</title>
+<style>
+/* ====== Tokens: ajustar a la marca ====== */
+:root{
+  --fondo:#0b1f2a; --fondo-2:#10303f; --texto:#eef6f8; --suave:#9fbac4;
+  --marca:#18b8a6; --acento:#ff8a3d; --peligro:#ff5d5d; --ok:#4ade80;
+  --borde:rgba(255,255,255,.12); --tarjeta:rgba(255,255,255,.05);
+  --fuente:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--fondo);color:var(--texto);font-family:var(--fuente);overflow:hidden}
+body{background:radial-gradient(1200px 800px at 85% -10%,rgba(24,184,166,.18),transparent 60%),
+                radial-gradient(900px 700px at -10% 110%,rgba(255,138,61,.12),transparent 60%),var(--fondo)}
+/* ====== Diapositivas ====== */
+.slide{position:absolute;inset:0;padding:6vh 7vw;display:flex;flex-direction:column;justify-content:center;gap:3.2vh;
+  opacity:0;transform:translateX(6vw) scale(.98);transition:opacity .6s ease,transform .7s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.slide.activa{opacity:1;transform:none;pointer-events:auto}
+.slide.previa{opacity:0;transform:translateX(-6vw) scale(.98)}
+.etiqueta{color:var(--marca);font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:clamp(12px,1.3vw,18px)}
+h1{font-size:clamp(36px,6vw,92px);line-height:1.02;font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(28px,4vw,60px);line-height:1.08;font-weight:800;letter-spacing:-.01em}
+p,li{font-size:clamp(16px,1.9vw,28px);line-height:1.45;color:var(--suave)}
+strong{color:var(--texto)}
+.marca{color:var(--marca)} .acento{color:var(--acento)}
+.degradado{background:linear-gradient(90deg,var(--marca),var(--acento));-webkit-background-clip:text;background-clip:text;color:transparent}
+ul.lista{list-style:none;display:grid;gap:1.6vh}
+ul.lista li{padding-left:1.6em;position:relative}
+ul.lista li::before{content:"";position:absolute;left:0;top:.55em;width:.6em;height:.6em;border-radius:50%;background:var(--marca);box-shadow:0 0 18px var(--marca)}
+.rejilla{display:grid;gap:2vw;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.tarjeta{background:var(--tarjeta);border:1px solid var(--borde);border-radius:18px;padding:2.4vh 1.6vw;backdrop-filter:blur(6px)}
+.tarjeta h3{font-size:clamp(18px,2vw,30px);margin-bottom:.6vh}
+.cita{font-size:clamp(22px,3vw,44px);line-height:1.3;color:var(--texto);border-left:6px solid var(--acento);padding-left:2vw;font-style:italic}
+.cita small{display:block;margin-top:1.4vh;font-size:.5em;color:var(--suave);font-style:normal}
+/* ====== Aparición por pasos ====== */
+.f{opacity:0;transform:translateY(18px);transition:opacity .5s ease,transform .6s cubic-bezier(.2,.8,.2,1)}
+.f.visible{opacity:1;transform:none}
+/* ====== Cifras ====== */
+.cifra{font-size:clamp(48px,7vw,120px);font-weight:900;line-height:1;letter-spacing:-.03em;white-space:nowrap}
+.cifra .unidad{font-size:.42em;letter-spacing:0;margin-left:.08em}
+.supuesto{font-size:clamp(12px,1.2vw,16px);color:var(--suave);opacity:.85}
+/* ====== Tabla ====== */
+table{width:100%;border-collapse:collapse;font-size:clamp(14px,1.6vw,24px)}
+th,td{text-align:left;padding:1.4vh 1vw;border-bottom:1px solid var(--borde)}
+th{color:var(--marca);font-weight:700}
+td{color:var(--suave)} td:first-child{color:var(--texto)}
+/* ====== Diagrama ====== */
+svg.diagrama{width:100%;max-height:62vh}
+.nodo rect{fill:var(--fondo-2);stroke:var(--marca);stroke-width:2;rx:14}
+.nodo text{fill:var(--texto);font:600 15px var(--fuente);text-anchor:middle}
+.nodo .sub{fill:var(--suave);font-weight:400;font-size:12px}
+.flecha{fill:none;stroke:var(--acento);stroke-width:2.5;stroke-dasharray:400;stroke-dashoffset:400;transition:stroke-dashoffset 1s ease}
+.flecha.visible{stroke-dashoffset:0}
+/* ====== Demo ====== */
+.demo{font-size:clamp(70px,14vw,220px);font-weight:900;letter-spacing:-.04em;animation:pulso 2.4s ease-in-out infinite}
+@keyframes pulso{50%{text-shadow:0 0 50px var(--marca)}}
+/* ====== Interfaz del presentador ====== */
+#progreso{position:fixed;left:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--marca),var(--acento));transition:width .5s}
+#reloj{position:fixed;right:18px;top:14px;font:700 15px var(--fuente);padding:6px 12px;border-radius:999px;background:var(--tarjeta);border:1px solid var(--borde);color:var(--suave);cursor:pointer;user-select:none}
+#reloj.alerta{color:var(--acento);border-color:var(--acento)} #reloj.fuera{color:#fff;background:var(--peligro);border-color:var(--peligro)}
+#contador{position:fixed;left:18px;top:14px;font:600 13px var(--fuente);color:var(--suave)}
+#notas{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:min(900px,92vw);max-height:30vh;overflow:auto;padding:14px 18px;border-radius:14px;
+  background:rgba(0,0,0,.82);border:1px solid var(--borde);color:#e5e7eb;font-size:16px;line-height:1.5;display:none}
+#notas.visible{display:block}
+aside.notas{display:none}
+#ayuda{position:fixed;right:18px;bottom:14px;font:12px var(--fuente);color:var(--suave);opacity:.6}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+/* ====== PDF: Chrome → Imprimir → Guardar como PDF, horizontal, sin márgenes ====== */
+@media print{
+  @page{size:1280px 720px;margin:0}
+  html,body{overflow:visible;height:auto;background:var(--fondo)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .slide{position:relative;opacity:1!important;transform:none!important;width:1280px;height:720px;page-break-after:always;break-after:page}
+  .f{opacity:1!important;transform:none!important} .flecha{stroke-dashoffset:0!important}
+  .degradado{background:none!important;color:var(--marca)!important;-webkit-text-fill-color:var(--marca)!important}
+  #progreso,#reloj,#contador,#notas,#ayuda{display:none!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ 1. PORTADA ============ -->
+<section class="slide">
+  <span class="etiqueta">Agentic Mindset Hackathon · CONFA × AWS · Reto 1</span>
+  <h1>Pase <span class="degradado">CONFA</span></h1>
+  <p class="f">Cada asistente entra a un evento de CONFA <strong>en segundos</strong>: con su rostro, con un QR o con su documento.</p>
+  <p class="f supuesto">Equipo 6 · Sergio Ramos · Luis David Agudelo</p>
+  <aside class="notas">Abrir con energía. No hablar de tecnología todavía. "Les vamos a contar cómo se entra hoy a un evento de CONFA." 20 segundos.</aside>
+</section>
+
+<!-- ============ 2. CLIENTE ============ -->
+<section class="slide">
+  <span class="etiqueta">Nuestro cliente</span>
+  <h2>El personal logístico en la puerta,<br><span class="marca">durante el ingreso masivo</span></h2>
+  <div class="cita f">"La fila crece más rápido de lo que avanza, y yo no sé cuántos han entrado ni quién falta."<small>Persona ilustrativa construida con el enunciado del reto · validar con el equipo logístico de CONFA en el kickoff</small></div>
+  <aside class="notas">Working Backwards P1. Contar la historia de Carolina, auxiliar de logística: listado en papel, cédula por cédula. Cliente secundario: el asistente, uno de cada cuatro sin rostro registrado. 40 segundos.</aside>
+</section>
+
+<!-- ============ 3. PROBLEMA ============ -->
+<section class="slide">
+  <span class="etiqueta">El problema</span>
+  <h2>Validar a mano no escala</h2>
+  <div class="rejilla">
+    <div class="tarjeta f"><div class="cifra acento" data-count="35" data-sufijo=" s">0</div><p>por asistente buscando en un listado de papel</p><p class="supuesto">Referencia del sector: 30–40 s (Fielddrive)</p></div>
+    <div class="tarjeta f"><div class="cifra acento" data-count="12086">0</div><p>asistentes en solo 2 eventos masivos de La Rochela</p><p class="supuesto">Oficial · Informe de Gestión 2025 de CONFA</p></div>
+    <div class="tarjeta f"><div class="cifra acento" data-count="10" data-prefijo="~" data-sufijo=" h">0</div><p>de flujo de ingreso para 6.000 personas</p><p class="supuesto">Supuesto: 6 puertas × 35 s por persona</p></div>
+  </div>
+  <aside class="notas">WB P2 y P4. Cada cifra con su etiqueta: oficial, referencia o supuesto. Mencionar que la consolidación al cierre también es manual. 50 segundos.</aside>
+</section>
+
+<!-- ============ 4. COMUNICADO ============ -->
+<section class="slide">
+  <span class="etiqueta">Manizales, 4 de noviembre de 2026</span>
+  <h2 class="f">CONFA lanza <span class="degradado">Pase CONFA</span> para que su personal logístico valide el ingreso a eventos en segundos</h2>
+  <p class="f">Antes: listados en papel, horas de fila y nadie sabía quién había entrado. Ahora: el asistente mira la cámara y entra; quien no tiene su rostro registrado, o prefiere no usarlo, muestra su QR o su documento.</p>
+  <aside class="notas">El comunicado de Working Backwards. Puente hacia la demo: "y así se ve". 30 segundos.</aside>
+</section>
+
+<!-- ============ 5. DEMO ============ -->
+<section class="slide" style="align-items:center;text-align:center">
+  <span class="etiqueta">En vivo</span>
+  <div class="demo degradado">DEMO</div>
+  <ul class="lista" style="text-align:left">
+    <li class="f">Ana mira la cámara → <strong>"Bienvenida, Ana"</strong> en segundos</li>
+    <li class="f">Luis no tiene rostro registrado → <strong>QR o cédula</strong>, y entra</li>
+    <li class="f">"¿Cuántos han entrado y quién falta de Arquitectos S.A.?" → respuesta con cifras reales + la traza del agente</li>
+  </ul>
+  <aside class="notas">3 a 4 minutos. Mostrar la pantalla del personal logístico, no la consola. Medir con el cronómetro el tiempo de ingreso de Ana. Mostrar un intento repetido (ya ingresó, no duplica). Cerrar con la traza en AgentCore Observability (15 s). Plan B en guion.md.</aside>
+</section>
+
+<!-- ============ 6. ARQUITECTURA ============ -->
+<section class="slide">
+  <span class="etiqueta">Arquitectura</span>
+  <h2>La puerta es código; <span class="marca">la conversación es un agente</span></h2>
+  <svg class="diagrama" viewBox="0 0 1000 300" role="img" aria-label="Diagrama de arquitectura de Pase CONFA">
+    <defs><marker id="punta" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="var(--acento)"/></marker></defs>
+    <g class="nodo f"><rect x="20" y="110" width="170" height="80"/><text x="105" y="145">Personal logístico</text><text class="sub" x="105" y="168">app web</text></g>
+    <path class="flecha" d="M190 130 C230 80 240 60 280 60" marker-end="url(#punta)"/>
+    <g class="nodo f"><rect x="280" y="20" width="200" height="80"/><text x="380" y="55">API Puerta (sin IA)</text><text class="sub" x="380" y="78">foto · QR · cédula</text></g>
+    <path class="flecha" d="M480 60 H560" marker-end="url(#punta)"/>
+    <g class="nodo f"><rect x="560" y="20" width="200" height="80"/><text x="660" y="55">API facial CONFA</text><text class="sub" x="660" y="78">foto → cédula</text></g>
+    <path class="flecha" d="M190 170 C230 220 240 240 280 240" marker-end="url(#punta)"/>
+    <g class="nodo f"><rect x="280" y="200" width="200" height="80"/><text x="380" y="235">AgentCore Runtime</text><text class="sub" x="380" y="258">agente Strands · Haiku 4.5</text></g>
+    <path class="flecha" d="M480 240 H560" marker-end="url(#punta)"/>
+    <g class="nodo f"><rect x="560" y="200" width="200" height="80"/><text x="660" y="235">AgentCore Gateway</text><text class="sub" x="660" y="258">consultas como herramientas</text></g>
+    <path class="flecha" d="M760 60 C800 60 820 120 840 140" marker-end="url(#punta)"/>
+    <path class="flecha" d="M760 240 C800 240 820 180 840 160" marker-end="url(#punta)"/>
+    <g class="nodo f"><rect x="840" y="110" width="150" height="80"/><text x="915" y="145">RDS del evento</text><text class="sub" x="915" y="168">sin imágenes</text></g>
+  </svg>
+  <aside class="notas">Explicar mientras se dibuja. Arriba: la puerta es código determinista porque la latencia manda. Abajo: el agente responde con cifras que siempre salen de los datos. Un solo agente: no hay razón de modelo, permisos ni prompt para separar. 60 segundos.</aside>
+</section>
+
+<!-- ============ 7. MODELOS ============ -->
+<section class="slide">
+  <span class="etiqueta">Decisiones</span>
+  <h2>Un modelo para cada tarea (y ninguno donde sobra)</h2>
+  <table>
+    <tr><th>Tarea</th><th>Modelo</th><th>Por qué</th></tr>
+    <tr class="f"><td>Validar en la puerta</td><td>Ninguno</td><td>Determinista; un LLM solo agregaría segundos</td></tr>
+    <tr class="f"><td>Asistente del personal</td><td>Claude Haiku 4.5</td><td>Herramientas y buen español con baja latencia</td></tr>
+    <tr class="f"><td>Foto grupal</td><td>Amazon Rekognition</td><td>Es visión, no lenguaje</td></tr>
+    <tr class="f"><td>Resumen del informe</td><td>Amazon Nova Micro</td><td>Un párrafo con cifras ya calculadas</td></tr>
+  </table>
+  <aside class="notas">Responde de antemano "¿por qué ese modelo?". Sonnet no mejora consultas de conteo y sí aumenta costo y latencia. 40 segundos.</aside>
+</section>
+
+<!-- ============ 8. SEGURIDAD ============ -->
+<section class="slide">
+  <span class="etiqueta">Ley 1581 · IA responsable</span>
+  <h2>Seguridad por capas</h2>
+  <div class="rejilla">
+    <div class="tarjeta f"><h3 class="marca">1 · Minimizar</h3><p>La foto nunca se guarda: el esquema no tiene columna de imagen</p></div>
+    <div class="tarjeta f"><h3 class="marca">2 · Herramientas</h3><p>El agente solo ve nombres, y el evento lo fija el código, no el modelo</p></div>
+    <div class="tarjeta f"><h3 class="marca">3 · Identidad</h3><p>Login del personal y permisos mínimos por evento</p></div>
+    <div class="tarjeta f"><h3 class="marca">4 · Guardrails</h3><p>Cédulas enmascaradas y ataques de prompt bloqueados</p></div>
+  </div>
+  <aside class="notas">Consentimiento antes de la cámara, con "Prefiero QR". A los menores de preescolar no se les aplica reconocimiento facial: valida el QR del acudiente. El agente consulta, nunca aprueba. 40 segundos.</aside>
+</section>
+
+<!-- ============ 9. IMPACTO ============ -->
+<section class="slide">
+  <span class="etiqueta">Impacto para CONFA</span>
+  <h2>Del papel a la puerta en segundos</h2>
+  <div class="rejilla">
+    <div class="tarjeta f"><div class="cifra degradado" data-count="70" data-prefijo="−" data-sufijo=" %">0</div><p>tiempo total de ingreso en un evento masivo</p><p class="supuesto">~9,7 h → ~2,9 h · 6 puertas, 75 % facial a 8 s y 25 % QR a 18 s</p></div>
+    <div class="tarjeta f"><div class="cifra degradado" data-count="75" data-sufijo=" %">0</div><p>de asistentes validados sin intervención manual</p><p class="supuesto">268.724 con identidad digital / 356.123 afiliados (oficial)</p></div>
+    <div class="tarjeta f"><div class="cifra degradado" data-count="0">0</div><p>listados impresos; consolidación inmediata</p><p class="supuesto">Asistencia registrada al ingresar</p></div>
+  </div>
+  <aside class="notas">La dimensión que más pesa (20 pts). Decir los supuestos en voz alta y que se validaron o se validarán con CONFA. 50 segundos.</aside>
+</section>
+
+<!-- ============ 10. THINK BIG ============ -->
+<section class="slide">
+  <span class="etiqueta">Think Big</span>
+  <h2>Lo que viene</h2>
+  <ul class="lista">
+    <li class="f"><strong>Mes 1:</strong> piloto en un evento masivo de La Rochela, midiendo el antes y el después</li>
+    <li class="f"><strong>Mes 3:</strong> asistencia con una foto del auditorio y un asistente de voz en la puerta (Nova Sonic)</li>
+    <li class="f"><strong>Año 1:</strong> todos los eventos y centros de CONFA; las herramientas del Gateway, reutilizadas por otros agentes</li>
+  </ul>
+  <aside class="notas">Visión grande pero creíble, conectada con la identidad digital que CONFA ya tiene. 30 segundos.</aside>
+</section>
+
+<!-- ============ 11. CIERRE ============ -->
+<section class="slide" style="text-align:center;align-items:center">
+  <h1 class="degradado">La puerta deja de ser una fila</h1>
+  <p class="f">Carolina ya no busca nombres en papel: ve quién entra, y cada asistente pasa en segundos.</p>
+  <p class="f etiqueta">Contigo, con todo</p>
+  <aside class="notas">Cierre contundente. Terminar antes del minuto 10. Agradecer y pasar a preguntas.</aside>
+</section>
+
+<div id="progreso"></div><div id="contador"></div>
+<div id="reloj" title="Clic: iniciar/pausar · R: reiniciar">10:00</div>
+<div id="notas"></div>
+<div id="ayuda">← → avanzar · N notas · F pantalla completa · T reloj</div>
+
+<script>
+(() => {
+  const slides = [...document.querySelectorAll('.slide')];
+  const DURACION = 10 * 60, ALERTA = 9 * 60;
+  let actual = 0, paso = 0;
+
+  const pasos = s => [...s.querySelectorAll('.f, .flecha')];
+  const notas = document.getElementById('notas');
+
+  const escapar = t => t.replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+  const formato = (el, v) => escapar(el.dataset.prefijo || '') + v.toLocaleString('es-CO') +
+    (el.dataset.sufijo ? '<span class="unidad">' + escapar(el.dataset.sufijo.trim()) + '</span>' : '');
+  const valorFinal = el => { el.innerHTML = formato(el, parseFloat(el.dataset.count)); };
+  // El valor final queda escrito desde el inicio: así el PDF y la vista sin JS nunca muestran "0"
+  document.querySelectorAll('[data-count]').forEach(valorFinal);
+  window.addEventListener('beforeprint', () => document.querySelectorAll('[data-count]').forEach(valorFinal));
+
+  function contar(el) {
+    if (el.dataset.hecho) return; el.dataset.hecho = 1;
+    const fin = parseFloat(el.dataset.count);
+    const t0 = performance.now(), dur = 1400;
+    const tick = t => { const p = Math.min(1, (t - t0) / dur), v = Math.round(fin * (1 - Math.pow(1 - p, 3)));
+      el.innerHTML = formato(el, v); if (p < 1) requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  }
+
+  function mostrar() {
+    slides.forEach((s, i) => { s.classList.toggle('activa', i === actual); s.classList.toggle('previa', i < actual); });
+    pasos(slides[actual]).forEach((el, i) => {
+      const ver = i < paso; el.classList.toggle('visible', ver);
+      if (ver) el.querySelectorAll('[data-count]').forEach(contar);
+      if (ver && el.matches('[data-count]')) contar(el);
+    });
+    slides[actual].querySelectorAll('.cifra[data-count]').forEach(c => { if (!c.closest('.f')) contar(c); });
+    const n = slides[actual].querySelector('aside.notas'); notas.textContent = n ? n.textContent : '';
+    document.getElementById('progreso').style.width = ((actual + 1) / slides.length * 100) + '%';
+    document.getElementById('contador').textContent = (actual + 1) + ' / ' + slides.length;
+    try { history.replaceState(null, '', '#' + (actual + 1)); } catch (e) {}
+  }
+
+  function avanzar() {
+    if (paso < pasos(slides[actual]).length) paso++;
+    else if (actual < slides.length - 1) { actual++; paso = 0; }
+    mostrar();
+  }
+  function retroceder() {
+    if (paso > 0) paso--;
+    else if (actual > 0) { actual--; paso = pasos(slides[actual]).length; }
+    mostrar();
+  }
+
+  // Reloj del presentador: 10 minutos, alerta al minuto 9
+  let segundos = 0, corriendo = false, intervalo = null;
+  const reloj = document.getElementById('reloj');
+  function pintarReloj() {
+    const r = DURACION - segundos, abs = Math.abs(r);
+    reloj.textContent = (r < 0 ? '+' : '') + String(Math.floor(abs / 60)).padStart(2, '0') + ':' + String(abs % 60).padStart(2, '0');
+    reloj.classList.toggle('alerta', segundos >= ALERTA && r >= 0);
+    reloj.classList.toggle('fuera', r < 0);
+  }
+  function alternarReloj() {
+    corriendo = !corriendo;
+    if (corriendo) intervalo = setInterval(() => { segundos++; pintarReloj(); }, 1000); else clearInterval(intervalo);
+  }
+  reloj.addEventListener('click', alternarReloj);
+
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); avanzar(); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); retroceder(); }
+    else if (e.key === 'n' || e.key === 'N') notas.classList.toggle('visible');
+    else if (e.key === 'f' || e.key === 'F') { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); }
+    else if (e.key === 't' || e.key === 'T') alternarReloj();
+    else if (e.key === 'r' || e.key === 'R') { segundos = 0; pintarReloj(); }
+    else if (e.key === 'Home') { actual = 0; paso = 0; mostrar(); }
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('#reloj, #notas')) avanzar(); });
+
+  const inicial = parseInt(location.hash.slice(1), 10);
+  if (inicial >= 1 && inicial <= slides.length) actual = inicial - 1;
+  pintarReloj(); mostrar();
+})();
+</script>
+</body>
+</html>
