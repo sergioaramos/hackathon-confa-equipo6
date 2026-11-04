@@ -1,6 +1,6 @@
 ---
 name: auditor-codigo
-description: "Auditor de solo lectura de la hackathon CONFA, lente \"codigo\" (calidad general de Python y React: correctitud, casos límite, manejo de errores, SQL parametrizado y mantenibilidad). Úsalo al cerrar bloques de tareas, antes de desplegar o antes de presentar."
+description: "Auditor de solo lectura de la hackathon CONFA, lente \"codigo\" (calidad general de Python y Angular: correctitud, casos límite, manejo de errores, SQL parametrizado y mantenibilidad). Úsalo al cerrar bloques de tareas, antes de desplegar o antes de presentar."
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---

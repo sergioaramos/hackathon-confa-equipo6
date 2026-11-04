@@ -48,7 +48,51 @@ Alcance: spec (sin código) — `docs/working-backwards.md`, `.kiro/specs/pase-c
 | R11 | spec-rubrica | 🟡 | EARS no verificables o redundantes | 3.3, 6.4, 13.1, 13.3, 13.6, 14.2 reescritos; 2.4 solo presencial o híbrido |
 | R12 | tests | 🟡 | Fecha fija y regex inconsistentes | Reloj inyectado `ahora()`; `REGEX_DOCUMENTO` única |
 
-## Pendientes de decisión del equipo
-1. Subir el Requisito 11 (consultas por texto) a MVP.
-2. Recorte del MVP: virtual e híbrido (15), foto grupal (10), duplicados entre dispositivos (7.5) y registro offline (7.8).
-3. Rehacer las métricas de impacto con modelo de cola y valor anual en pesos.
+## Decisiones del equipo (4 nov)
+1. Requisito 11 (consultas por texto) sube a MVP → resuelve A10 y R1.
+2. Virtual e híbrido (15), foto grupal (10), 7.5 y 7.8 pasan a Deseable → resuelve R2.
+3. Métricas rehechas con modelo de cola y valor anual en pesos en `docs/working-backwards.md` → resuelve R5.
+
+R5 queda **resuelto** con la decisión 3.
+
+## Decisiones del equipo (4 nov, 2.ª ronda)
+Frontend en Angular · MVP sin pasadías ni QR por correo · sedes fuera de la demo · esquema de BD propio con datos ficticios · API facial con `x-api-key`, solo producción · us-east-1 con Haiku 4.5 · equipo de 2 (frontend / resto) · roles por evento con cuentas del administrador CONFA · PIN definido por el logístico · modos de puerta logístico y punto fijo · QR solo descargable · reingreso en ámbar · cupo flexible y aforo rígido · CSV con plantilla · `resumen_novedades` · aviso de habeas data (borrador).
+
+---
+
+# Auditoría 2.ª ronda: spec-rubrica · codigo (frontend) · seguridad (delta)
+Alcance: documentos tras el cambio a Angular y las decisiones de la 2.ª ronda (design v3 → v4) · 4 nov 2026 · dos subagentes `auditor` en paralelo.
+
+| Lente | Veredicto antes de corregir |
+|---|---|
+| spec-rubrica + codigo (frontend) | LISTO CON AJUSTES — nota estimada 54/100 hoy, 88 proyectada |
+| seguridad (delta) | LISTO CON AJUSTES |
+
+| # | Lente | Sev. | Hallazgo | Resolución |
+|---|---|---|---|---|
+| C1 | spec | 🔴 | QR no regenerable con solo `sha256(token)` | `token = HMAC(secreto_qr, inscripcion_id ‖ qr_version)`; PNG/PDF en servidor sin documento; rotación (2.6) |
+| C2 | spec | 🔴 | Punto fijo: el ámbar no llega al logístico | 4.8 y `GET /eventos/{id}/pendientes` |
+| C3 | spec | 🟠 | Comunicado promete Deseables | Comunicado reescrito; "Próximamente: pasadías, virtual e híbrido, sedes" |
+| C4 | spec | 🟠 | WB Experiencia y mockup con Deseables sin marcar | Pasos marcados "(Deseable)"; QR compartido por el organizador; mockup sin foto grupal |
+| C5 | spec | 🟠 | Tablas del reto sin prioridad | Columna de prioridad; "varios rostros" Deseable; pasadía agregada; 2.4 y 8.1 ajustados |
+| C6 | agentcore | 🟠 | Memory: plan sin verificar y contradicción | Comando verificado `--strategies SUMMARIZATION` limitado a la sesión, 3 días |
+| C7 | codigo | 🟠 | CSP incompatible con estilos de Angular | CSP completa con `style-src 'unsafe-inline'`, Trusted Types, `inlineCritical: false` |
+| C8 | codigo | 🟠 | Guards sin fuente de roles | `GET /me/eventos` en un `signal`; el 403 de la API es la barrera |
+| C9 | tests | 🟠 | Vitest sin IndexedDB y PBKDF2 lento | Interfaces `Almacen`, `Cripto` y `ahora()` inyectadas |
+| C10 | spec | 🟡 | Numeración 13.x | 13.9–13.12 en orden |
+| C11 | spec | 🟡 | Restos (`VITE_*`, región, Haiku 5.5, diagrama) | Corregidos; Página virtual y Rekognition marcados Deseables |
+| C12 | codigo | 🟡 | Interceptor, polling, cámara | JWT solo a `apiBase`; `takeUntilDestroyed`; `facingMode: { ideal }`; `ng serve --ssl` |
+| C13 | spec | 🟡 | Retención de consentimientos | 1 año, igual que la trazabilidad |
+| C14 | spec | 🟡 | Fuente vendor de la evidencia 5 | Fielddrive citado; rangos sin fuente única marcados [supuesto] |
+| C15 | spec | 🟡 | Informe de auditoría desactualizado | Esta sección |
+| D1 | seguridad | 🔴 | Punto fijo expone una sesión del personal | Rol `punto_fijo` (solo rostro y QR), ruta `/kiosco` bloqueada con código de supervisor, cámara solo tras "Acepto" (4.7) |
+| D2 | seguridad | 🔴 | Paquete en caché HTTP; envoltura ambigua; contador | `Cache-Control: no-store`; `ngsw` sin `dataGroups`; envoltura en serie; contador en claro como barrera de uso (13.12) |
+| D3 | seguridad | 🟠 | Token de Cognito y CSP sin `connect-src` | PKCE con `angular-auth-oidc-client`, refresh de 12 h, `revokeToken`/`GlobalSignOut`, `connect-src`, `Permissions-Policy` |
+| D4 | seguridad | 🟠 | Autorización por correo; quién asigna roles | Llave `sub`; `email` no modificable; grupos `admin_confa`, `creador_eventos`, `aprobador`; 13.11 |
+| D5 | seguridad | 🟠 | QR masivo sin control | Solo el organizador, sin documento, registrado (`descargar_qr`), rotación |
+| D6 | seguridad | 🟠 | Inyección de fórmulas CSV y sobrescritura | Validación al importar, escape al exportar, `nombre_cargado` en inscripciones, informe enmascarado, URL de 5 min |
+| D7 | seguridad | 🟠 | Semáforo sin orden; tipos de documento | Orden de evaluación; lista permitida de adultos; 6.6 no editable |
+| D8 | seguridad | 🟠 | Aforo con carreras y sin conexión | Transacción con `FOR UPDATE`; tope local offline (9.5) |
+| D9 | seguridad | 🟠 | 1 petición/s no garantizado; pruebas contra producción | *Throttling* en API Gateway; `FACIAL_MODO=mock` por defecto; `conftest.py` |
+| D10 | seguridad | 🟠 | Aviso borrador sin mínimos legales | Texto con responsable, finalidad, carácter facultativo y alternativa (5.8); API real solo con documentos del equipo mientras sea borrador |
+| D11 | seguridad | 🟡 | `resumen_novedades` | Solo conteos, con prueba |

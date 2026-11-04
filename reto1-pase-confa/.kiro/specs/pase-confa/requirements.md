@@ -3,7 +3,9 @@
 ## Introducción
 Quien llega a un evento de CONFA (empleado de una empresa afiliada, afiliado, familia en un pasadía) hace fila porque el logístico lo busca a mano en un listado de papel: 30–40 s por persona. Pase CONFA identifica a cada asistente en segundos (rostro, QR o documento), muestra al logístico quién es y qué hacer, funciona sin internet y consolida la asistencia en tiempo real; también atiende a quien llega sin estar registrado en el evento. La solicitud y aprobación de sedes por empresas externas es un añadido.
 
-Convenciones: [MVP] debe funcionar de punta a punta hoy miércoles a las 4:00 p. m.; [Deseable] se hace si sobra tiempo. Las cifras marcadas [supuesto] se validan en el kickoff.
+Convenciones: [MVP] debe funcionar de punta a punta hoy miércoles a las 4:00 p. m.; [Deseable] se hace si sobra tiempo. Un criterio marcado [Deseable] dentro de un requisito MVP también se hace solo si sobra tiempo. Las cifras marcadas [supuesto] se validan en el kickoff.
+
+**Alcance MVP** (decisión del equipo, 4 nov, tras la auditoría): requisitos 1–9, 11, 13 y 14, sin los criterios 2.5, 7.5, 7.8 y 9.6. **Deseable:** 10 (foto grupal), 12 (sedes, fuera de la demo), 15 (virtual e híbrido), 16 (crear eventos con lenguaje natural), 17 (voz), 2.5 (QR por correo), 7.5, 7.8 y 9.6 (pasadías).
 
 ## Requisitos
 
@@ -22,7 +24,7 @@ _Origen: WB-P3 (beneficio), WB-P5 (experiencia)_
 1.8 IF la API indica más de un rostro en la foto (`cnt` distinto de 1) THEN THE SYSTEM SHALL pedir una foto con una sola persona, porque la API admite una cara por solicitud.
 1.9 THE SYSTEM SHALL aceptar una identificación facial solo si `est = true`, `adv = false`, `cnt = 1` y la confianza (`pcr`) es mayor o igual a un umbral configurable (95 [supuesto]).
 1.10 WHEN la API devuelve el documento con sufijo de tipo (por ejemplo, "1053846567-C") THE SYSTEM SHALL separar número y tipo de documento y buscar a la persona por ambos.
-1.11 IF la persona identificada por rostro consta como menor de edad THEN THE SYSTEM SHALL NOT registrar el ingreso por rostro y SHALL pedir QR o documento del acudiente (segunda barrera; la primera es 5.1 y 5.5).
+1.11 IF la persona identificada por rostro consta como menor de edad, o su tipo de documento no está en la lista de tipos de adulto (cédula de ciudadanía, cédula de extranjería, pasaporte [supuesto: `C`, `E`, `P`]; cualquier otro tipo o uno desconocido cuenta como menor) THEN THE SYSTEM SHALL NOT registrar el ingreso por rostro y SHALL pedir QR o documento del acudiente (segunda barrera; la primera es 5.1 y 5.5).
 
 ### Requisito 2: Ingreso por QR [MVP]
 **Historia:** Como asistente sin rostro registrado, quiero entrar con mi QR, para no depender de la cámara.
@@ -31,8 +33,10 @@ _Origen: WB-P2 (problema), WB-P4 (evidencia 3: ~1 de cada 4 sin rostro)_
 #### Criterios de aceptación
 2.1 WHEN el logístico escanea un QR válido THE SYSTEM SHALL registrar la asistencia con método "QR" y mostrar el resultado en menos de 2 s [supuesto].
 2.2 IF el QR no existe, no corresponde al evento o el evento está cerrado THEN THE SYSTEM SHALL mostrar estado rojo con el motivo en lenguaje simple; IF el QR ya fue usado THEN THE SYSTEM SHALL aplicar 1.5.
-2.3 THE SYSTEM SHALL generar por inscrito un QR con un identificador aleatorio no adivinable (al menos 122 bits) que no contenga datos personales.
-2.4 WHEN se inscribe una persona a un evento presencial o híbrido THE SYSTEM SHALL generar su QR y ponerlo a disposición para descargar o enviar.
+2.3 THE SYSTEM SHALL generar por inscrito un QR con un código no adivinable (al menos 128 bits), regenerable en el servidor y sin datos personales, y guardar solo su huella (hash).
+2.4 WHEN se inscribe una persona a un evento presencial THE SYSTEM SHALL generar su QR y permitir **solo al organizador del evento** descargarlo (individual o todos en un archivo con nombre y QR, sin documento), registrando cada descarga. El envío por correo es Deseable (2.5).
+2.5 [Deseable] WHEN el organizador lo pida THE SYSTEM SHALL enviar a cada inscrito con correo su QR por correo electrónico.
+2.6 WHEN el organizador rota los QR de una persona o de todo el evento THE SYSTEM SHALL invalidar los anteriores, que en la puerta salen en rojo.
 
 ### Requisito 3: Ingreso por documento o cédula [MVP]
 **Historia:** Como asistente sin rostro ni QR, quiero entrar con mi documento, para que nadie se quede por fuera.
@@ -53,19 +57,23 @@ _Origen: WB-P1 (cliente), WB-P2 (problema)_
 4.3 THE SYSTEM SHALL NOT mostrar al logístico diagnósticos, datos de salud ni imágenes del rostro.
 4.4 THE SYSTEM SHALL ofrecer botones de acción de al menos 48 px de alto, legibles a pleno sol (contraste mínimo 4,5:1).
 4.5 WHEN el logístico confirma o rechaza un caso ámbar THE SYSTEM SHALL registrar quién decidió, qué y cuándo.
+4.6 THE SYSTEM SHALL ofrecer dos modos de puerta: "logístico" (celular o tableta en la mano, cámara trasera, el logístico lee el aviso y toca) y "punto fijo" (dispositivo fijo con cámara frontal frente al asistente, el aviso se muestra en pantalla y el asistente toca él mismo "Acepto").
+4.7 WHILE un dispositivo esté en modo punto fijo THE SYSTEM SHALL usar una sesión que solo permita validar por rostro y QR, mostrar solo el nombre y el semáforo, impedir navegar a otras pantallas sin el código de supervisor del logístico, abrir la cámara solo después de "Acepto" y apagarla tras la captura o a los 10 s.
+4.8 WHEN en punto fijo un caso queda en ámbar THE SYSTEM SHALL mostrar "Espere al logístico, por favor" y enviar el caso al dispositivo del logístico para que decida en máximo 3 s.
 
 ### Requisito 5: Consentimiento y alternativa sin biometría [MVP]
 **Historia:** Como asistente, quiero decidir si uso mi rostro, para no ser obligado a ello.
 _Origen: WB-P5 (privacidad), seguridad.md regla 3_
 
 #### Criterios de aceptación
-5.1 WHEN un asistente va a ser validado con el rostro THE SYSTEM SHALL mostrar al logístico un aviso de máximo 25 palabras para leer en voz alta y pedir un toque de aceptación que incluya la confirmación "es mayor de edad", antes de abrir la cámara.
+5.1 WHEN un asistente va a ser validado con el rostro THE SYSTEM SHALL mostrar un aviso de máximo 25 palabras tomado de la autorización de tratamiento de datos (habeas data) de CONFA, con referencia a su política completa, y pedir un toque de aceptación que incluya la confirmación "es mayor de edad", antes de abrir la cámara. En modo logístico lo lee el logístico; en punto fijo lo lee y toca el asistente (4.6).
 5.2 IF el asistente no acepta o no es mayor de edad THEN THE SYSTEM SHALL abrir QR o cédula en el mismo toque, sin pasos adicionales.
 5.3 WHEN el reconocimiento termina (con o sin éxito) THE SYSTEM SHALL descartar la foto y NOT guardarla en RDS, logs, almacenamiento del dispositivo ni memoria del agente.
 5.4 WHILE la persona conste como menor de edad en el paquete o en la inscripción THE SYSTEM SHALL NOT ofrecer reconocimiento facial y SHALL validar con QR o documento del acudiente.
 5.5 WHILE el evento esté marcado como dirigido a menores (por ejemplo, preescolar) THE SYSTEM SHALL desactivar la cámara de validación y la foto grupal para todo el evento.
 5.6 WHEN un menor ingresa con QR o documento del acudiente THE SYSTEM SHALL registrar la asistencia a nombre del menor, con el documento del acudiente en la decisión.
-5.7 WHEN se hace un intento de validación facial THE SYSTEM SHALL registrar la constancia del consentimiento (evento, puerta, logístico, hora, versión del aviso y resultado), sin imagen, aunque el ingreso no se complete.
+5.7 WHEN se hace un intento de validación facial THE SYSTEM SHALL registrar la constancia del consentimiento (evento, puerta, logístico, modo, quién aceptó, hora, versión del aviso y resultado), sin imagen, aunque el ingreso no se complete.
+5.8 THE SYSTEM SHALL mostrar en el aviso, como mínimo, que CONFA es el responsable, que el rostro se usa solo para validar el ingreso al evento, que es opcional y que existe la alternativa de QR o documento.
 
 ### Requisito 6: Eventos sin registro previo [MVP]
 **Historia:** Como logístico de un evento abierto, quiero identificar y registrar a quien llega sin inscripción, para no frenar la fila.
@@ -77,6 +85,7 @@ _Origen: WB-P2 (problema: eventos sin registro previo)_
 6.3 IF la persona no existe en la identidad de CONFA ni en el evento THEN THE SYSTEM SHALL permitir registrarla con cédula, nombre, teléfono y correo (datos mínimos), previa aceptación del tratamiento de datos, y generarle su QR.
 6.4 THE SYSTEM SHALL incluir estas asistencias en el panel (8.1) y en el informe (8.3) con los mismos campos que las de eventos con lista.
 6.5 IF la persona llega sin estar inscrita en un evento con lista THEN THE SYSTEM SHALL mostrar estado ámbar "no inscrita" y permitir al logístico registrarla en sitio con los mismos datos mínimos o rechazarla.
+6.6 IF la API facial identifica un documento que no tiene nombre en la base del evento (la API devuelve solo el documento) THEN THE SYSTEM SHALL mostrar ámbar "Identificado, faltan datos" y abrir el registro en sitio con el documento ya diligenciado y no editable; IF el logístico cambia el documento THEN THE SYSTEM SHALL registrar el ingreso con método "cédula".
 
 ### Requisito 7: Funcionamiento sin conexión [MVP]
 **Historia:** Como logístico en una sede con mala señal, quiero seguir validando sin internet, para que la fila no se detenga.
@@ -87,19 +96,19 @@ _Origen: WB-P2 (consecuencia), WB-P4 (evidencia 7)_
 7.2 WHILE el dispositivo no tenga conexión THE SYSTEM SHALL validar QR y cédula contra la lista descargada y registrar los ingresos localmente.
 7.3 WHILE el dispositivo no tenga conexión THE SYSTEM SHALL mostrar un aviso visible "Sin conexión" y el número de ingresos pendientes de envío.
 7.4 WHEN regresa la conexión THE SYSTEM SHALL enviar los ingresos pendientes sin intervención del usuario y mostrar cuándo terminó.
-7.5 IF una misma persona fue registrada en dos dispositivos sin conexión THEN THE SYSTEM SHALL conservar el ingreso con la hora más temprana del dispositivo, corregida por el desfase de su reloj, y marcar el duplicado para revisión.
+7.5 [Deseable] IF una misma persona fue registrada en dos dispositivos sin conexión THEN THE SYSTEM SHALL conservar el ingreso con la hora más temprana del dispositivo, corregida por el desfase de su reloj, y marcar el duplicado para revisión.
 7.6 WHILE no haya conexión THE SYSTEM SHALL NOT usar reconocimiento facial (no hay modelo facial local) y SHALL ofrecer QR y cédula como métodos de validación.
-7.7 THE SYSTEM SHALL cifrar la lista descargada con una clave protegida por un PIN del logístico, pedir el PIN al abrir la puerta, y borrarla al cerrar el evento, al vencer su caducidad (comprobada al abrir la aplicación) o tras 5 PIN fallidos.
-7.8 IF, sin conexión, la cédula digitada no está en la lista descargada THEN THE SYSTEM SHALL permitir registrar a la persona localmente como "no inscrita" con cédula, nombre, teléfono y correo, y enviarla al volver la conexión.
+7.7 THE SYSTEM SHALL cifrar la lista descargada con una clave protegida por un PIN de 6 dígitos que define el propio logístico al descargarla y que nunca sale del dispositivo, pedir el PIN al abrir la puerta y tras 15 minutos sin uso, y borrarla al cerrar el evento, al vencer su caducidad (comprobada al abrir la aplicación) o tras 5 PIN fallidos.
+7.8 [Deseable] IF, sin conexión, la cédula digitada no está en la lista descargada THEN THE SYSTEM SHALL permitir registrar a la persona localmente como "no inscrita" con cédula, nombre, teléfono y correo, y enviarla al volver la conexión.
 
 ### Requisito 8: Panel en vivo y consolidación [MVP]
 **Historia:** Como organizador, quiero saber quién entró y quién falta, para cerrar el evento sin transcribir listados.
 _Origen: WB-P2 (problema), WB-P4 (métricas)_
 
 #### Criterios de aceptación
-8.1 WHILE el evento esté abierto THE SYSTEM SHALL mostrar entradas, total esperado, faltantes, porcentaje y desglose por método (rostro, QR, cédula, virtual) con actualización en menos de 5 s [supuesto].
+8.1 WHILE el evento esté abierto THE SYSTEM SHALL mostrar entradas, total esperado, faltantes, porcentaje y desglose por método (rostro, QR, cédula; virtual cuando exista el Requisito 15) con actualización en menos de 5 s [supuesto].
 8.2 WHEN el organizador pregunta quién falta, opcionalmente filtrando por empresa, THE SYSTEM SHALL listar los inscritos sin ingreso.
-8.3 WHEN el organizador cierra el evento THE SYSTEM SHALL generar el informe de asistencia (inscritos, ingresados, no asistentes, método, hora) descargable en CSV en menos de 10 s [supuesto].
+8.3 WHEN el organizador cierra el evento THE SYSTEM SHALL generar el informe de asistencia (nombre, documento enmascarado, empresa, estado, método, hora y puerta; sin teléfono ni correo) descargable en CSV en menos de 10 s [supuesto], con las celdas que empiezan por `= + - @` neutralizadas, por un enlace que vence a los 5 minutos.
 8.4 THE SYSTEM SHALL calcular y mostrar el tiempo promedio de ingreso por asistente, por método, para medir la mejora.
 8.5 WHILE el evento esté cerrado THE SYSTEM SHALL rechazar nuevos ingresos con estado rojo "El evento ya está cerrado".
 
@@ -109,11 +118,14 @@ _Origen: WB-P5 (experiencia, "Antes"), reto: creación e inscripción_
 
 #### Criterios de aceptación
 9.1 WHEN el organizador describe el evento (nombre, fecha, sede, aforo, tipo) THE SYSTEM SHALL crearlo y mostrarlo en la lista de eventos.
-9.2 WHEN el organizador carga una lista de inscritos (cédula y nombre) THE SYSTEM SHALL validarla, informar las filas con error y registrar las válidas.
-9.3 THE SYSTEM SHALL soportar los tres tipos de evento (externo por reserva, interno e individual administrado por CONFA como pasadía) y, para cada uno, la modalidad presencial, virtual o híbrida (ver requisito 15).
+9.2 WHEN el organizador carga un archivo CSV (UTF-8, separado por comas o punto y coma, máximo 10.000 filas y 2 MB) con las columnas `tipo_doc` (opcional, por defecto C), `numero_doc`, `nombre`, `empresa` (opcional) y `correo` (opcional) THE SYSTEM SHALL validarlo (incluido rechazar campos que empiecen por `= + - @`), quitar duplicados, informar cada fila con error y su motivo, y registrar las válidas sin sobrescribir los datos de personas ya existentes. THE SYSTEM SHALL ofrecer una plantilla descargable.
+9.3 THE SYSTEM SHALL soportar en el MVP los tipos de evento externo e interno en modalidad presencial; el tipo individual administrado por CONFA (pasadía) y las modalidades virtual e híbrida son Deseables (9.6 y Requisito 15).
 9.4 IF un ingreso supera el cupo del evento THEN THE SYSTEM SHALL mostrar estado ámbar "Se superó el cupo" y registrar el ingreso solo si el logístico asignado lo autoriza, dejando la decisión registrada.
+9.5 IF un ingreso supera el aforo de la sede THEN THE SYSTEM SHALL mostrar estado rojo "Aforo de la sede completo" y NOT permitir el ingreso, aunque dos puertas validen al mismo tiempo; este límite es de seguridad y nadie lo puede saltar desde la aplicación. WHILE no haya conexión THE SYSTEM SHALL aplicar un tope local por dispositivo y, al alcanzarlo, mostrar rojo "Verifique el aforo con el coordinador".
+9.6 [Deseable] THE SYSTEM SHALL soportar eventos individuales administrados por CONFA (pasadías), sin inscripción previa.
+9.7 WHILE la asistencia llegue al 90 % del cupo THE SYSTEM SHALL mostrar un aviso en el panel del organizador.
 
-### Requisito 10: Marcado masivo por foto grupal [MVP]
+### Requisito 10: Marcado masivo por foto grupal [Deseable]
 **Historia:** Como organizador de un evento interno, quiero marcar la asistencia de todo un auditorio con una foto, para no llamar a lista.
 _Origen: reto (caso "Encuentro con el Director")_
 
@@ -125,7 +137,7 @@ _Origen: reto (caso "Encuentro con el Director")_
 10.5 IF el evento no tiene inscripción previa o está dirigido a menores THEN THE SYSTEM SHALL NOT ofrecer la foto grupal.
 10.6 WHEN la persona se inscribe a un evento interno THE SYSTEM SHALL pedirle, por separado y de forma opcional, el consentimiento de foto grupal.
 
-### Requisito 11: Consultas y reportes en lenguaje natural por texto [Deseable — se propone MVP]
+### Requisito 11: Consultas y reportes en lenguaje natural por texto [MVP]
 **Historia:** Como organizador o logístico, quiero preguntar en mis palabras ("¿cuántos han entrado?", "¿quién falta de Arquitectos S.A.?", "hazme el reporte de asistencia"), para obtener datos y reportes sin navegar pantallas.
 _Origen: WB-P1 (cliente), WB-P5 (experiencia, "Durante y al cierre"), complemento "consultas y reportería"_
 
@@ -137,6 +149,7 @@ _Origen: WB-P1 (cliente), WB-P5 (experiencia, "Durante y al cierre"), complement
 11.5 WHEN el usuario pregunta por una persona ("¿ya entró Ana Gómez?") THE SYSTEM SHALL responder si ingresó, a qué hora y por qué canal, con máximo 5 coincidencias por nombre.
 11.6 WHEN el usuario hace una pregunta que depende de la anterior ("¿y de la empresa Y?") THE SYSTEM SHALL resolverla con el contexto de la misma conversación.
 11.7 IF el dato no está disponible en las herramientas THEN THE SYSTEM SHALL decirlo y NOT estimarlo.
+11.8 WHEN el usuario pregunta por novedades ("¿cuántos se registraron en sitio?", "¿hay casos por revisar?") THE SYSTEM SHALL responder solo con conteos (registros en sitio, reingresos, ingresos con cupo superado, rechazos e ingresos marcados para revisión), sin datos de contacto.
 
 ### Requisito 12: Solicitud y aprobación de eventos externos [Deseable, añadido]
 **Historia:** Como empresa afiliada, quiero pedir una sede y saber si está disponible, para organizar mi evento; y como aprobador de CONFA, quiero aceptar o rechazar, para controlar la ocupación.
@@ -157,12 +170,15 @@ _Origen: seguridad.md (reglas 1 a 10)_
 13.1 THE SYSTEM SHALL guardar solo: de la persona, documento, nombre y, si se registró en sitio, teléfono y correo; de cada ingreso, método, canal, hora, puerta, logístico y tiempo de validación; de cada intento facial, la constancia de 5.7. THE SYSTEM SHALL NOT guardar imágenes, plantillas biométricas ni la confianza del reconocimiento por persona.
 13.2 THE SYSTEM SHALL devolver a cada rol solo los datos que puede ver; el diagnóstico nunca sale de la base de datos hacia el logístico ni el aprobador.
 13.3 THE SYSTEM SHALL leer todas las credenciales (API facial, base de datos, claves) de Secrets Manager o de roles de IAM, y NOT tenerlas en el código, en el repositorio ni en el navegador.
-13.4 WHEN un usuario del personal ingresa THE SYSTEM SHALL autenticarlo y darle acceso solo a las acciones de su rol (logístico, organizador, aprobador) y a los eventos que tiene asignados; IF pide datos de otro evento THEN THE SYSTEM SHALL responder 403.
-13.5 THE SYSTEM SHALL registrar quién hizo qué y cuándo en: decisiones ámbar, registro en sitio, reingreso, cupo superado, confirmación de eventos, aprobación de sedes, descarga del paquete offline y exportación del informe; y NOT permitir modificar ni borrar esos registros.
-13.6 THE SYSTEM SHALL usar HTTPS en tránsito, cifrado en reposo, y borrar cada dato al cumplir su retención (ingresos y personas registradas en sitio: 90 días tras el evento [supuesto]; registros de trazabilidad: 1 año [supuesto]; memoria del agente: 3 días; logs: 30 días).
+13.4 WHEN un usuario del personal ingresa con una cuenta creada por un administrador de CONFA THE SYSTEM SHALL autenticarlo y darle acceso solo a los eventos que tiene asignados y, en cada uno, a las acciones de los roles que tiene en ese evento (organizador, logístico, punto fijo; puede tener varios), identificándolo por su identificador inmutable de cuenta y no por su correo; IF pide datos de otro evento THEN THE SYSTEM SHALL responder 403.
+13.5 THE SYSTEM SHALL registrar quién hizo qué y cuándo en: decisiones ámbar, registro en sitio, reingreso, cupo superado, confirmación de eventos, asignación de roles, aprobación de sedes, descarga del paquete offline, descarga y rotación de QR y exportación del informe; y NOT permitir modificar ni borrar esos registros.
+13.6 THE SYSTEM SHALL usar HTTPS en tránsito, cifrado en reposo, y borrar cada dato al cumplir su retención (ingresos y personas registradas en sitio: 90 días tras el evento [supuesto]; registros de trazabilidad y constancias de consentimiento: 1 año [supuesto]; memoria del agente: 3 días; logs: 30 días).
 13.7 WHEN el texto de un usuario contenga un número de documento (con o sin puntos, espacios o sufijo de tipo) THE SYSTEM SHALL reemplazarlo antes de enviarlo al modelo, y THE SYSTEM SHALL enmascararlo en logs y en las respuestas del modelo.
-13.8 THE SYSTEM SHALL usar solo datos ficticios o los entregados por CONFA para el evento, y la API facial real solo con rostros del equipo que lo autoricen.
-13.9 WHEN un logístico asignado inicia sesión THE SYSTEM SHALL mostrar la puerta de su evento en máximo 2 toques y mantener la sesión hasta el cierre del evento.
+13.8 THE SYSTEM SHALL usar solo datos ficticios o los entregados por CONFA para el evento. La API facial es solo de producción: las pruebas automáticas usan siempre el mock y fallan si se configura la API real; la API real se usa a mano, con un máximo de 1 petición por segundo aplicado en la entrada de la API, y mientras el aviso sea un borrador solo con documentos del equipo que lo autoricen.
+13.9 WHEN un logístico asignado inicia sesión THE SYSTEM SHALL mostrar la puerta de su evento en máximo 2 toques y mantener la sesión hasta el cierre del evento, con un máximo de 12 horas.
+13.10 WHEN un logístico tiene varios eventos asignados el mismo día THE SYSTEM SHALL permitirle elegir el evento al entrar y tener un paquete offline por evento.
+13.11 IF un organizador intenta asignar en un evento un rol distinto de logístico o punto fijo, o asignar roles en un evento que no es suyo THEN THE SYSTEM SHALL responder 403.
+13.12 THE SYSTEM SHALL enviar las respuestas con datos personales con la indicación de no guardarlas en la caché del navegador, y NOT guardar datos personales en la caché del service worker.
 
 ### Requisito 14: Usabilidad para quien no conoce la tecnología [MVP]
 **Historia:** Como asistente sin conocimiento de tecnología, quiero entrar sin instalar ni aprender nada, para no sentirme excluido.
@@ -174,7 +190,7 @@ _Origen: WB-P1 (cliente), complemento (asistente sin tecnología)_
 14.3 WHEN un asistente tenga dificultades THE SYSTEM SHALL permitir al logístico completar el ingreso con la cédula en máximo 3 toques.
 14.4 THE SYSTEM SHALL permitir al logístico iniciar una validación (rostro, QR o cédula) con un solo toque desde la pantalla principal.
 
-### Requisito 15: Eventos virtuales e híbridos [MVP]
+### Requisito 15: Eventos virtuales e híbridos [Deseable]
 **Historia:** Como organizador, quiero que mi evento pueda ser virtual o híbrido, para contar la asistencia de quienes entran en persona y de quienes se conectan.
 _Origen: WB-P2 (problema: asistencia virtual no consolidada), WB-P5 (experiencia 5.1e)_
 
@@ -235,19 +251,22 @@ _Origen: complemento "voz" del equipo_
 | Seguridad (seguridad.md) | 1.6–1.11, 5, 10.1–10.6, 11.4, 12.5, 13, 15.8, 16.6, 17.3 |
 
 ## Casos de uso del reto
-| Caso | Cobertura |
-|---|---|
-| Con inscripción previa (afiliados o empresas) | 1, 2, 3, 9 |
-| Interno sin registro ("Encuentro con el Director") | 6, 10 |
-| Externo por documento (preescolar) | 3, 5.4–5.6, 6.3 |
-| Virtual e híbrido (complemento del equipo, WB §5.1e) | 15 |
+| Caso | Cobertura | Prioridad |
+|---|---|---|
+| Con inscripción previa (afiliados o empresas) | 1, 2, 3, 9 | MVP |
+| Interno sin registro ("Encuentro con el Director") | 6 (cédula o rostro uno a uno, varias puertas) | MVP |
+| Interno masivo con foto grupal | 10 | Deseable |
+| Externo por documento (preescolar) | 3, 5.4–5.6, 6.3 | MVP |
+| Individual administrado por CONFA (pasadía) | 9.6 | Deseable |
+| Virtual e híbrido (complemento del equipo, WB §5.1e) | 15 | Deseable |
 
 ## Requisitos funcionales oficiales del reto
-| Requisito oficial | Criterio |
-|---|---|
-| Reconocimiento facial como motor principal (1 a 1 o varios rostros) | 1.1, 1.6–1.10, 10.1 |
-| Creación del evento | 9, 16 |
-| Contingencia para no enrolados: QR u otro método | 2, 3, 1.3 |
-| Control de acceso y consolidación en tiempo real | 8.1 |
-| Acceso rápido y seguro del personal logístico | 13.4, 13.9, 14.4 |
-| No guardar imágenes | 5.3, 13.1 |
+| Requisito oficial | Criterio | Prioridad |
+|---|---|---|
+| Reconocimiento facial como motor principal: 1 a 1 | 1.1, 1.6–1.11 | MVP |
+| Reconocimiento facial: varios rostros por foto | 10.1 (en el MVP el caso masivo se atiende 1 a 1 en varias puertas o puntos fijos) | Deseable |
+| Creación del evento | 9 (formulario); 16 (lenguaje natural) | MVP; Deseable |
+| Contingencia para no enrolados: QR u otro método | 1.3, 2, 3 | MVP |
+| Control de acceso y consolidación en tiempo real | 8.1, 8.3 | MVP |
+| Acceso rápido y seguro del personal logístico | 13.4, 13.9, 13.10, 14.4 | MVP |
+| No guardar imágenes | 5.3, 13.1 | MVP |

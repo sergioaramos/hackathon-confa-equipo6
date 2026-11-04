@@ -11,11 +11,11 @@ Spec primero: `docs/working-backwards.md` → `.kiro/specs/<slug>/requirements.m
 ## Stack
 - Agentes: **Strands Agents** (Python). Despliegue: **Amazon Bedrock AgentCore** con la CLI `@aws/agentcore` (no el starter toolkit viejo).
 - Modelos: Amazon Bedrock, elegidos por tarea (ver `design.md`).
-- Frontend: React + Vite. Datos: RDS del evento; lo que no exista se simula con mocks con contrato documentado.
+- Frontend: Angular (PWA). Backend: Lambdas en Python. Datos: RDS del evento con esquema propio; lo que no exista se simula con mocks con contrato documentado.
 - Detalle técnico verificado: skill `agentcore-strands`.
 
 ## Reglas de código
-- TDD en lo crítico: herramientas de los agentes, reglas de negocio, contingencias y reglas de seguridad. El frontend no exige TDD.
+- TDD en lo crítico: herramientas de los agentes, reglas de negocio, contingencias y reglas de seguridad. El frontend no exige TDD, salvo la lógica sin conexión (`puerta-offline`), que es contingencia y se prueba con Vitest.
 - Cada `@tool` con type hints y docstring que diga qué hace, qué recibe y qué devuelve.
 - Lo determinista es código, no LLM.
 - Respuestas al usuario en español, con el tono de CONFA ("Contigo, con todo").

@@ -34,8 +34,13 @@ Ver `docs/working-backwards.md`.
 
 ## Métricas de impacto
 - Ingreso de un evento de 6.000 asistentes: ~9,7 h → ~2,9 h de flujo (−70 %) [supuesto: 6 puertas, tiempos de referencia del sector].
-- ~75 % de validaciones sin intervención manual [cobertura biométrica oficial].
+- Espera promedio en fila de un evento masivo: ~3 h 52 min → ~26 min [supuesto: llegada uniforme en 2 h].
+- ~54.600 horas de espera evitadas al año (2 masivos + 44 empresariales), ~$409 M a $7.500/h [supuesto]; ~224 h de personal, ~$3,4 M a $15.000/h [supuesto].
+- ~75 % de validaciones sin buscar en papel, como techo [cobertura biométrica oficial].
 - Consolidación inmediata; cero listados impresos.
+
+## Alcance MVP (4 nov)
+MVP: requisitos 1–9, 11 (consultas por texto al agente), 13 y 14, con eventos externos e internos presenciales y QR descargable. Deseable: QR por correo, pasadías, foto grupal (10), sedes (12, fuera de la demo), virtual e híbrido (15), crear eventos con lenguaje natural (16), voz (17), sincronización entre dispositivos y registro offline (7.5, 7.8).
 
 ## Fuera de alcance
 Pagos y venta de boletería; integración con sistemas de CONFA distintos de la API facial y la RDS del evento.

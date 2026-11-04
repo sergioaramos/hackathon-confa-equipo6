@@ -19,10 +19,15 @@
 - [ ] Consultas SQL parametrizadas (nunca f-strings con datos del usuario).
 - [ ] Recursos cerrados (`with` para conexiones y archivos). Ojo: `with sqlite3.connect()` hace commit pero no cierra.
 
-## Frontend (React)
+## Frontend (Angular)
 - [ ] Estados de carga y error visibles (la demo en vivo los va a mostrar).
-- [ ] No hay claves ni endpoints secretos en el bundle del cliente.
+- [ ] No hay claves ni endpoints secretos en el bundle del cliente (`environment*.ts` solo con URLs públicas).
 - [ ] Textos en español y accesibles (contraste, tamaño legible en el proyector).
+- [ ] Componentes *standalone* y estado con `signals`; sin lógica de negocio en las plantillas.
+- [ ] Sin `bypassSecurityTrust*`, `innerHTML` con datos externos ni `eval`; el sanitizador de Angular queda activo.
+- [ ] `HttpClient` con un interceptor que agrega el JWT; los 401 renuevan el token y los 403 muestran un mensaje claro.
+- [ ] Suscripciones cerradas (`takeUntilDestroyed`, `async` pipe) y sin *polling* que siga vivo al salir de la pantalla.
+- [ ] Lógica sin conexión aislada en TypeScript puro (sin dependencias de Angular) y con pruebas Vitest en verde (`ng test --watch=false`).
 
 ## Repo
 - [ ] `README` con cómo correr la demo en 3 comandos.
