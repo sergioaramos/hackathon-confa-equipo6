@@ -26,6 +26,8 @@ uv run pytest
 ```
 Las pruebas siempre usan el mock de la API facial: si `FACIAL_MODO=real`, la suite se detiene.
 
+Las pruebas levantan su propio PostgreSQL embebido (`pgserver`), sin Docker. Para desarrollo, `uv run python -m db.local` levanta una base en `backend/.pgdata` (no se versiona) solo en `127.0.0.1`, aplica las migraciones, carga la semilla ficticia e imprime el `PASE_DB_URL`. La semilla usa documentos del rango `99000000NN`; los rostros reales del equipo nunca van en el repositorio.
+
 ## Correr el agente en local
 Proyecto AgentCore en `PaseConfa/` (plantilla `agent-python-strands`). Crea `PaseConfa/agentcore/.env.local` (no se versiona) con:
 ```
