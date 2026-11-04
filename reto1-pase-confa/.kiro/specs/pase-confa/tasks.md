@@ -14,7 +14,7 @@ Entrada: `requirements.md` y `design.md` v4 (4 nov 2026).
 ## Bloque 1 · Punta a punta mínimo (MVP)
 Meta: iniciar sesión → elegir evento → validar por cédula → semáforo → asistencia → panel → preguntar al agente desplegado.
 
-- [ ] 1. [B] Esqueleto del repositorio: carpetas `backend/` (`apis/`, `comun/`, `db/migrations/`, `tests/`), `infra/`, `mocks/`; `.gitignore` con `.venv`, `node_modules`, `.env*`, `cdk.out` y `agentcore/.env.local`; `pytest.ini` con la marca `eval` excluida por defecto; `conftest.py` que hace fallar la suite si `FACIAL_MODO=real`
+- [x] 1. [B] Esqueleto del repositorio: carpetas `backend/` (`apis/`, `comun/`, `db/migrations/`, `tests/`), `infra/`, `mocks/`; `.gitignore` con `.venv`, `node_modules`, `.env*`, `cdk.out` y `agentcore/.env.local`; `pytest.ini` con la marca `eval` excluida por defecto; `conftest.py` que hace fallar la suite si `FACIAL_MODO=real`
   - Hecha cuando: `pytest` corre en verde con 0 pruebas, `git check-ignore agentcore/.env.local` lo ignora y `FACIAL_MODO=real pytest` falla
   - _Requisitos: 13.3, 13.8_
 - [ ] 2. [B] Crear el proyecto con `agentcore create --name PaseConfa --template agent-python-strands`; `model/load.py` lee `MODELO_BEDROCK` (`us.anthropic.claude-haiku-4-5-20251001-v1:0`); probar el ID con `aws bedrock-runtime converse` en us-east-1

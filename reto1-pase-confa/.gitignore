@@ -2,6 +2,10 @@
 node_modules/
 cdk.out/
 __pycache__/
+.pytest_cache/
+.angular/
+dist/
 .env*
 !.env.example
+agentcore/.env.local
 .DS_Store
