@@ -10,14 +10,24 @@ Caja de Compensación Familiar de Caldas (Manizales). Lema: "Contigo, con todo".
 Reto 1: experiencia y control de eventos.
 
 ## Cliente
-- Principal: el personal logístico de CONFA en la puerta de un evento, durante el ingreso masivo.
-- Secundario: el asistente (uno de cada cuatro sin rostro registrado).
+- Principal: el asistente (que entre rápido; uno de cada cuatro sin rostro registrado; puede no tener internet ni conocimiento de tecnología) y el logístico en la puerta (que lo reconozca y sepa qué hacer).
+- Añadido (no es el núcleo): la empresa afiliada que solicita un evento y el aprobador de CONFA que acepta la reserva.
+- Tipos de evento: externo por reserva, interno, e individual administrado por CONFA (pasadías en centros recreacionales).
 
 ## Problema
-Validación manual con listados de papel: 30-40 s por persona, filas de horas en eventos masivos, sin visibilidad de quién entró, consolidación manual al cierre.
+Identificar a cada persona es el cuello de botella. En la puerta, validación manual con listados de papel: 30-40 s por persona, filas largas bajo el sol, sin visibilidad de quién entró, consolidación manual al cierre y sin alternativa si falla internet.
+
+## Complementos (4 nov)
+- Mayor problema: identificar a la persona, de forma masiva o individual. El logístico en la entrada debe ver quién es y qué hacer, sin diagnósticos.
+- Voz solo como interfaz para consultas y reportes (Deseable); la voz como biometría y la cédula dicha al sistema quedan fuera de alcance.
+- Asistente puede no tener conocimiento de tecnología.
+- Hay eventos sin registro previo: se identifica y registra en el momento (datos mínimos: cédula, nombre, teléfono, correo).
+- Los eventos pueden ser presenciales, virtuales o híbridos; la asistencia se consolida por canal.
+- Sin conexión no hay reconocimiento facial local: se valida con QR y cédula.
+- Voz: consultas y reportes en lenguaje natural (Deseable).
 
 ## Beneficio principal
-Ingreso en segundos: con la cara, con QR o con documento, sin buscar en papel.
+Ingreso en segundos, con o sin internet: con la cara, con QR o con documento, sin buscar en papel.
 
 ## Comunicado de prensa
 Ver `docs/working-backwards.md`.

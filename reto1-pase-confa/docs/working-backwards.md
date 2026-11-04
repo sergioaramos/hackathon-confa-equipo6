@@ -1,21 +1,36 @@
 # Working Backwards — Reto 1: experiencia y control de eventos
 
-> Borrador en construcción (laboratorio del 3 nov 2026).
+> BORRADOR v3 (4 nov 2026). **Núcleo:** que el asistente entre rápido y que CONFA lo reconozca. **Añadido (no es el núcleo):** que empresas externas soliciten eventos y CONFA los apruebe. Lo marcado [supuesto] se valida en el kickoff.
 
 ## Reto
-Centralizar y digitalizar el ciclo de vida de los eventos de CONFA (creación, inscripción, tickets, control de acceso en sitio y consolidación en tiempo real) para colegios, afiliados, empresas y colaboradores internos.
+Centralizar y digitalizar el ciclo de vida de los eventos de CONFA. El foco es el control de acceso en sitio (con o sin internet), con reconocimiento de la persona y consolidación de asistencia en tiempo real. La solicitud y aprobación de eventos externos se suma como complemento.
+
+## Tipos de evento (los tres casos de uso)
+| Tipo | Quién lo organiza | Ejemplo | Cómo se entra |
+|---|---|---|---|
+| Externo por reserva | Empresa afiliada, que pide la sede a CONFA | Encuentro de Arquitectos S.A. en La Rochela | Cara, QR o documento |
+| Interno | Un área de CONFA | "Encuentro con el Director" | Marcado masivo con foto grupal, QR o documento |
+| Individual administrado por CONFA | CONFA | Pasadía en un centro recreacional | Cara (identidad ya existente), QR o documento |
+| Virtual o híbrido | Cualquiera de los anteriores | Charla en línea, o evento presencial con transmisión | Virtual: enlace personal y cédula. Híbrido: presencial más virtual en un solo informe |
 
 ## 1. Cliente
-- **Principal:** el personal logístico de CONFA en la puerta de un evento, durante los 30 a 60 minutos de ingreso masivo, con una fila de cientos de personas y un listado en papel para validar a cada una.
-- **Secundario:** el asistente, que hace fila sin saber cuánto le falta. Uno de cada cuatro no tiene la cara registrada y necesita otra forma de entrar.
+- **Principal (junto): el asistente y el logístico en la puerta.** El **asistente** (empleado de la empresa, afiliado, familia en un pasadía) hace fila al sol y quiere entrar rápido. **Puede no tener conocimiento de tecnología**: no sabe instalar una app ni mostrar un QR. Uno de cada cuatro no tiene el rostro registrado y puede no tener internet. El **logístico parado en la entrada** necesita reconocerlo y saber qué hacer, sin buscar nada. Quien organiza (empresa afiliada o área de CONFA) es el mismo que gestiona la puerta en sus eventos.
+- **Secundario (añadido): la empresa afiliada que solicita un evento y el aprobador de CONFA** que acepta la reserva según disponibilidad.
 
 ## 2. Problema
-En cada ingreso masivo, el personal logístico busca a cada asistente a mano en un listado de papel: pide la cédula, pasa hojas y marca con lápiz. Cada persona toma entre 30 y 40 segundos, y la fila crece más rápido de lo que avanza. Cuando llega alguien que no aparece o no está inscrito, todo se detiene mientras se decide qué hacer. El personal no tiene un acceso rápido y seguro a la plataforma desde la puerta, así que trabaja a ciegas: no sabe cuántos han entrado ni quién falta.
+**El mayor problema es la identificación de la persona**, ya sea de forma masiva (cientos en minutos) o individual (una familia en un pasadía). Todo lo demás (fila, papel, consolidación) nace de que identificar a alguien hoy es buscarlo a mano. El logístico en la puerta no tiene a la mano quién es la persona, a qué evento tiene derecho ni si ya entró.
+También **hay eventos virtuales e híbridos**: quien se conecta en línea no pasa por ninguna puerta, y hoy su asistencia se cuenta aparte o no se cuenta, así que la asistencia total de un evento híbrido no se puede consolidar.
+Además, **hay eventos sin registro previo** (por ejemplo, entrada abierta a afiliados o a quienes se presenten ese día): no existe lista contra la cual validar, y hay que identificar y registrar a la persona en el momento.
+
+**Para el asistente:** filas largas, bajo calor, para entrar a un evento al que fue invitado. En un pasadía, esa espera le quita tiempo de disfrute.
+**Para el logístico:** valida a cada persona a mano en un listado de papel (30–40 s cada una), sin saber cuántos han entrado, y al final transcribe para consolidar.
+**Añadido, para quien solicita el evento y para CONFA:** pedir una sede implica preguntar por disponibilidad y esperar respuesta, sin una vista única de disponibilidad ni de solicitudes.
 
 **Consecuencias:**
-- En un evento masivo de ~6.000 asistentes, el ingreso toma del orden de 9 a 10 horas de flujo repartidas entre 6 puertas.
-- Al cierre, alguien pasa horas transcribiendo listados para consolidar la asistencia.
-- Se imprime papel en cada evento.
+- Evento masivo de ~6.000 asistentes: ~9,7 h de flujo repartido en 6 puertas.
+- Horas de consolidación manual al cierre.
+- Papel impreso en cada evento.
+- Si falla internet en el sitio, hoy la única alternativa es el papel.
 
 | Cifra | Etiqueta | Fuente |
 |---|---|---|
@@ -25,55 +40,150 @@ En cada ingreso masivo, el personal logístico busca a cada asistente a mano en 
 | Horas de consolidación | [supuesto] | Validar en el kickoff |
 
 ## 3. Beneficio principal
-**Ingreso en segundos:** cada asistente entra en segundos, con su cara o con un QR, sin que nadie lo busque en papel. El control en vivo y el cero papel son consecuencias de este beneficio.
+**Ingreso en segundos, con o sin internet:** el logístico sabe quién es cada persona en segundos y la deja entrar, ya sea con su cara, su QR o su documento, tenga o no registro previo, sin buscarla en papel. Solicitar eventos, administrar y consolidar son complementos que apoyan ese beneficio; no son beneficios separados.
+
+Cómo se reflejan los demás atributos que pidió el equipo (son criterios de diseño, no beneficios):
+| Atributo | Traducción medible |
+|---|---|
+| Tiempos | Segundos por asistente; minutos de fila |
+| Gestión y administración | Solicitud, aprobación y asistencia en un solo lugar; sin listados |
+| Disponibilidad | La puerta sigue validando sin internet y sincroniza al reconectar |
+| Usabilidad | El personal opera con un toque; el organizador crea un evento con una frase |
+| Innovación | Rostro como llave de entrada sobre la identidad que CONFA ya tiene |
 
 ## 4. Evidencia
 | # | Evidencia | Etiqueta | Qué prueba |
 |---|---|---|---|
-| 1 | El enunciado de CONFA reconoce "cuellos de botella, filas, papel y listados manuales" y que el personal "no siempre accede de forma rápida y segura" a la plataforma en sitio | [oficial] | Que el dolor existe: lo dice el cliente |
-| 2 | CONFA ya tiene identidad digital biométrica de 268.724 personas y usa reconocimiento facial en el ingreso a sus centros recreacionales (Informe de Gestión 2025) | [oficial] | Que la solución se apoya en algo que CONFA ya opera |
-| 3 | ~75 % de cobertura biométrica (268.724 / 356.123) → ~1 de cada 4 asistentes necesitará QR | [oficial + cálculo] | Que la contingencia QR es un flujo principal |
-| 4 | 44 eventos empresariales; 12.086 asistentes en 2 eventos masivos de La Rochela; 15.803 usos en eventos y bienestar (Informe 2025) | [oficial] | Que el problema se repite y el impacto escala |
-| 5 | Listado manual 30–40 s; QR 15–20 s; facial 3–10 s por persona | [vendor] | Orden de magnitud de la mejora |
-| 6 | Pregunta a un mentor de CONFA en el kickoff: duración del ingreso, puertas y tiempo de consolidación | [kickoff] | Convierte los supuestos en datos reales |
+| 1 | El enunciado reconoce "cuellos de botella, filas, papel y listados manuales" y que el personal "no siempre accede de forma rápida y segura" a la plataforma en sitio | [oficial] | Que el dolor existe |
+| 2 | Identidad digital biométrica de 268.724 personas y reconocimiento facial en los centros recreacionales (Informe 2025) | [oficial] | Que la solución se apoya en algo que CONFA ya opera, incluidos los pasadías |
+| 3 | ~75 % de cobertura (268.724 / 356.123) → ~1 de cada 4 usará QR o documento | [oficial + cálculo] | Que la alternativa es un flujo principal |
+| 4 | 44 eventos empresariales; 12.086 asistentes en 2 eventos masivos; 15.803 usos en eventos y bienestar (Informe 2025) | [oficial] | Que el problema se repite |
+| 5 | Listado manual 30–40 s; QR 15–20 s; facial 3–10 s | [vendor] | Orden de magnitud de la mejora |
+| 6 | Las empresas afiliadas preguntan disponibilidad, reservan y CONFA acepta | [equipo, conocimiento del proceso] | Que existe el flujo de solicitud y aprobación |
+| 7 | El asistente puede no tener internet en el sitio | [equipo] | Que el modo sin conexión es requisito, no extra |
+| 8 | CONFA realiza eventos virtuales e híbridos además de presenciales | [equipo] | Que la asistencia debe consolidarse por canal; validar en el kickoff |
+| 9 | Preguntas a mentores de CONFA en el kickoff (duración de ingreso, puertas, consolidación, conectividad en sedes) | [kickoff] | Convierte supuestos en datos |
 
-En la demo se mide el tiempo de ingreso en vivo con el cronómetro.
+## 5. Experiencia
 
-## 5. Experiencia (personal logístico)
-**Antes del evento**
-1. El organizador describe el evento en una frase ("Encuentro de afiliados de Arquitectos S.A., sábado 9 a. m. en La Rochela, 300 inscritos") y queda creado.
-2. Cada inscrito recibe su código QR por correo como respaldo.
+### 5.1 Organizador (empresa afiliada o área de CONFA)
+> Los pasos 1 a 3 de "Antes" (solicitud de sede y aprobación) son el **añadido**: no bloquean el núcleo. El núcleo empieza en el paso 4 y en "El día del evento"; si el evento ya existe, se crea directamente.
 
-**En la puerta**
-3. El personal entra a la aplicación desde su celular o tableta con acceso rápido y seguro.
-4. El asistente mira la cámara: en ~3 s aparece "Bienvenida, Ana Gómez" y la asistencia queda marcada.
-5. Si no lo reconoce (~1 de cada 4), la pantalla pide el QR, que se escanea.
-6. Sin QR, se digita la cédula y se valida contra los inscritos; si no está inscrito, se puede registrar en el momento.
+**Antes**
+1. Escribe "Encuentro de afiliados, sábado 9 a. m., La Rochela, 300 personas". Ve en pantalla qué sedes están disponibles ese día.
+2. Elige la sede y envía la solicitud. Si es un evento interno de CONFA, se crea directamente.
+3. CONFA aprueba (o propone otra fecha). El organizador recibe el aviso y el evento queda confirmado.
+4. Carga o inscribe a los invitados. Cada uno recibe su QR; se le sugiere guardarlo en el celular para usarlo sin internet.
 
-**Durante y al cierre**
-7. El personal pregunta "¿cuántos han entrado y quién falta de Arquitectos S.A.?" y recibe la respuesta al instante.
-8. "Encuentro con el Director": una foto del auditorio marca la asistencia de todos los que aparecen.
-9. Al cerrar, el informe de asistencia está listo.
+**El día del evento**
+5. Abre el evento desde su celular o tableta con acceso rápido y seguro. Antes de salir, descarga la lista del evento al dispositivo.
+6. En la puerta, el logístico lee un aviso corto y el asistente acepta con un toque; mira la cámara y en ~4–5 s, incluido ese toque, aparece "Bienvenida, Ana Gómez". Si no lo reconoce o prefiere no usar el rostro, muestra el QR (sirve sin internet). Sin QR, se digita la cédula.
+7. Sin conexión, el dispositivo valida contra la lista descargada y guarda los ingresos. Al volver la señal, sincroniza solo, y la pantalla avisa "N ingresos pendientes de enviar".
+8. Pregunta "¿cuántos han entrado y quién falta?" y recibe la respuesta al instante (con datos al día de ese dispositivo si no hay conexión).
 
-**Privacidad:** aviso de consentimiento antes de usar el rostro. La foto nunca se guarda: solo la cédula y la hora. En preescolar, a los niños no se les aplica reconocimiento facial; valida el QR o el documento del acudiente.
+**Al cierre**
+9. El informe de asistencia está listo; no hay nada que transcribir.
+
+### 5.1b Lo que ve el logístico de cada persona
+Al identificar a alguien, la pantalla muestra en una sola vista, por ahora solo lo mínimo: nombre, evento y si ya ingresó (hora y puerta), más una señal clara: verde pasa, ámbar revisar, rojo no autorizado, con el motivo en palabras simples. **Nunca** muestra diagnósticos ni datos de salud.
+
+### 5.1c Eventos sin registro previo y personas no inscritas
+1. El organizador crea el evento marcándolo como "sin inscripción previa".
+2. En la puerta, el sistema identifica a la persona con su rostro o su cédula contra la identidad que CONFA ya tiene.
+3. Si es afiliada o conocida, se registra la asistencia en ese momento. Si no existe, el logístico la registra con cédula, nombre, teléfono y correo (con su consentimiento) en unos pocos toques, y se le genera su QR.
+4. Si el evento tiene lista y llega alguien no inscrito, aparece en ámbar "no inscrita" y el logístico decide registrarla o rechazarla. Sin internet, queda guardada y se envía al volver la señal.
+5. La asistencia se consolida igual que en un evento con lista.
+
+### 5.1d Consultas y reportes en lenguaje natural (texto; voz como Deseable)
+- El organizador o el logístico preguntan en sus palabras: "¿cuántos han entrado?", "¿quién falta de Arquitectos S.A.?", "¿ya entró Ana Gómez?", "hazme el reporte de asistencia". El sistema responde en pantalla y, con voz, también en voz alta.
+- Solo consulta: no cambia la asistencia ni aprueba nada.
+- La voz es una *interfaz*, no una biometría. Identificar a una persona por su voz queda fuera de alcance. Ver pregunta abierta 9.
+
+### 5.1e Eventos virtuales e híbridos
+1. Al crear el evento, el organizador elige presencial, virtual o híbrido, y pega el enlace de la reunión (Teams, Zoom u otro) si aplica.
+2. Cada inscrito recibe un enlace personal. Al conectarse, confirma su cédula en una página sencilla, sin instalar nada ni usar el rostro, y su asistencia queda registrada.
+3. En un evento híbrido, el panel muestra en un solo lugar cuántos entraron en persona y cuántos se conectaron, y si alguien hizo ambas cosas se cuenta una sola vez.
+4. El informe final trae la asistencia presencial y virtual consolidada.
+
+### 5.2 Asistente
+1. Si tiene correo o celular, recibe su invitación con QR y el aviso de privacidad. En eventos internos puede aceptar, aparte, salir en la foto grupal. Si no tiene conocimiento de tecnología, no necesita hacer nada antes: llega, muestra su cédula o mira la cámara.
+2. En la puerta, el logístico le lee un aviso corto y le pregunta si acepta usar su rostro. Puede aceptar o elegir QR o documento: es un derecho, no un castigo. A los menores no se les aplica reconocimiento facial.
+3. El logístico lo guía; él solo mira la cámara o muestra su documento. Sin internet, el rostro no está disponible: se valida con QR o cédula.
+4. Ve "Bienvenida" y pasa. En un pasadía, la misma validación le sirve para entrar al centro recreacional.
+
+### 5.3 Aprobador de CONFA
+1. Ve las solicitudes pendientes con fecha, sede, aforo y calendario de disponibilidad.
+2. Aprueba, rechaza o propone otra fecha. Queda registrado quién aprobó qué y cuándo.
+
+**Privacidad:** consentimiento antes de usar el rostro. La foto nunca se guarda: solo la cédula y la hora. A los niños no se les aplica reconocimiento facial; valida el QR o el documento del acudiente. El aprobador no ve datos sensibles de los asistentes.
+
+### 5.4 Mockups del organizador
+Versión visual en el artefacto "Mockups organizador v2" de la sesión (crear evento con modalidad, puerta con persona identificada y no inscrita, panel híbrido, sin internet). El esquema ASCII siguiente es la primera versión de tres pantallas:
+
+```
+[1] Crear / solicitar evento
++------------------------------------------+
+| Nuevo evento                             |
+| "Encuentro de afiliados, sábado 9 a. m., |
+|  La Rochela, 300 personas"       [Crear] |
+| ---------------------------------------- |
+| Sede        Fecha     Disponibilidad     |
+| La Rochela  sáb 7 nov  ● Disponible      |
+| Sede Centro sáb 7 nov  ○ Ocupada         |
+|                       [Enviar solicitud] |
++------------------------------------------+
+
+[2] Panel en vivo (puerta)
++------------------------------------------+
+| Encuentro de afiliados     ● En línea    |
+| Entraron 212 / 300    Faltan 88          |
+| [=========>     ] 71 %                   |
+| Última entrada: Ana Gómez  3 s           |
+| Rostro 74 %  QR 21 %  Cédula 5 %         |
+| [Escanear QR]  [Cédula]  [Foto grupal]   |
++------------------------------------------+
+
+[3] Puerta sin internet
++------------------------------------------+
+| ⚠ Sin conexión: validando en el equipo   |
+| 18 ingresos pendientes de enviar         |
+| Lista descargada: 300 invitados          |
+| [Escanear QR]  [Cédula]                  |
++------------------------------------------+
+```
 
 ## Comunicado de prensa
-# CONFA lanza "Pase CONFA" para que su personal logístico valide el ingreso a eventos en segundos
-*Manizales, 4 de noviembre de 2026.* Desde hoy, el personal logístico de CONFA valida el ingreso a sus eventos en segundos, sin buscar a nadie en listados de papel. Antes, cada asistente tomaba entre 30 y 40 segundos en la puerta, un evento masivo acumulaba horas de fila y nadie sabía con certeza quién había entrado hasta transcribir los listados al final del día. Ahora, el asistente mira la cámara y en tres segundos aparece su bienvenida. Quien no tiene su rostro registrado, o prefiere no usarlo, muestra el código QR que recibió al inscribirse, y quien no lo tiene se valida con su documento. Desde la misma pantalla, el personal pregunta cuántos han entrado y quién falta, y recibe la respuesta al instante.
-"Antes la fila le daba la vuelta al parqueadero; ahora la gente pasa casi sin detenerse", cuenta Carolina, auxiliar de logística en La Rochela.
+# CONFA lanza "Pase CONFA" para que organizar un evento y entrar a él tome segundos, con o sin internet
+*Manizales, 4 de noviembre de 2026.* Desde hoy, quien llega a un evento de CONFA es reconocido y entra en segundos, y el logístico de la puerta ve de inmediato quién es y qué hacer. Antes, cada persona tomaba entre 30 y 40 segundos mientras la fila crecía bajo el sol y nadie sabía con certeza quién había entrado hasta transcribir los listados. Ahora, el asistente acepta con un toque, mira la cámara y en unos segundos aparece su bienvenida; si no tiene su rostro registrado o prefiere no usarlo, muestra su código QR, aun sin conexión a internet, y quien no lo tiene se valida con su documento. En un pasadía, la misma validación lo lleva directo a disfrutar. El organizador pregunta cuántos han entrado y quién falta y recibe la respuesta al instante. En eventos virtuales o híbridos, quien se conecta confirma su cédula en una página con su enlace personal y la asistencia en línea y en persona queda en un solo informe. Además, las empresas afiliadas ya pueden pedir su sede y recibir la aprobación de CONFA desde el mismo lugar.
+"Antes la fila le daba la vuelta al parqueadero; ahora la gente pasa casi sin detenerse", cuenta Carolina, auxiliar de logística en La Rochela. *(Cita ilustrativa; reemplazar por una frase real del kickoff.)*
 En su primer evento masivo, el tiempo total de ingreso se redujo cerca de un 70 % *(estimado con 6 puertas y tiempos de referencia del sector)*.
 
 ## Métricas y supuestos
 | Métrica | Antes | Después | Supuesto |
 |---|---|---|---|
-| Tiempo por asistente | 30–40 s [vendor] | ~3–8 s facial; 15–20 s QR [vendor] | 75 % facial, 25 % QR |
-| Flujo de ingreso, evento de 6.000 | ~9,7 h | ~2,9 h (−70 %) | 6 puertas |
+| Tiempo por asistente | 30–40 s [vendor] | ~4–5 s facial con el toque de consentimiento (diseño); el modelo usa 8 s, conservador; 15–20 s QR [vendor] | 75 % facial (techo: cobertura biométrica), 25 % QR |
+| Flujo de ingreso, evento de 6.000 | ~9,7 h | ~2,9 h (−70 %) | 6 puertas; promedio ponderado ~10,4 s (8 s facial, 17,5 s QR) |
+| Horas-persona del personal en la puerta | ~58 h | ~17 h (−41 h) | 1 persona por puerta cada instante; 6.000 × 35 s vs 6.000 × 10,4 s |
+| Valor del tiempo del personal ahorrado | — | ~$0,6 M COP por evento masivo | [supuesto] $15.000 COP/h; validar costo real |
 | Consolidación de asistencia | Horas [supuesto] | Inmediata | Validar en el kickoff |
 | Papel | Listados impresos | 0 | — |
 | % validados sin intervención manual | 0 % | ~75 % | Cobertura biométrica |
+| Ingreso sin internet | No posible sin papel | Sí, con lista descargada | Dispositivo con lista previa |
+
+El valor mayor no está en el costo del personal: está en la espera de los asistentes. Las ~42 h de la cuenta anterior (6.000 × ~25 s) son solo tiempo de atención en la puerta; la espera en fila que se evita es mucho mayor y depende de cómo llegue la gente, por eso se mide en el evento [supuesto, validar en el kickoff].
 
 ## Preguntas abiertas para el kickoff
 1. ¿Cuánto dura hoy el ingreso a un evento grande y cuántas puertas usan?
 2. ¿Cuánto tardan en consolidar la asistencia?
 3. ¿Cuál es la latencia de la API facial y acepta recortes de una foto grupal?
 4. ¿Se permite registrar en sitio a personas no inscritas?
+5. ¿Cómo gestiona hoy CONFA las solicitudes de sede: correo, llamada, sistema? ¿Quién aprueba y en cuánto tiempo?
+6. ¿Hay calendario de disponibilidad de sedes en una base de datos o es manual?
+7. ¿Qué sedes tienen mala conectividad? ¿El modo sin internet es del dispositivo de la puerta, del QR del asistente, o de ambos?
+8. ¿Los pasadías ya usan el reconocimiento facial en la entrada? ¿Se integra o se reutiliza?
+9. "Voz para entrar a CONFA": ¿es hablarle al sistema (comandos, decir la cédula) o identificar a la persona por su voz? Si es lo segundo, ¿CONFA tiene un servicio de voz y base de huellas de voz, o no?
+10. En eventos sin registro previo, ¿contra qué base se identifica a la persona (la identidad digital de CONFA, afiliados, otra) y se permite registrar a quien no existe?
+11. ¿Qué datos de la persona puede ver el logístico en la puerta (empresa, categoría, acompañantes)?
+12. Perfil del asistente sin conocimiento de tecnología: ¿qué porcentaje y qué canal funciona mejor (documento en papel, ayuda del logístico)?
+13. Eventos virtuales e híbridos: ¿qué plataforma usa CONFA (Teams, Zoom u otra) y cómo cuenta hoy la asistencia en línea?
+14. Sin conexión no hay reconocimiento facial local: ¿es aceptable que sin internet se valide solo con QR y cédula?
